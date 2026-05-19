@@ -1,5 +1,5 @@
-import {App, PluginSettingTab, Setting} from 'obsidian';
-import Nova from './main';
+import { App, PluginSettingTab, Setting } from 'obsidian';
+import type Nova from './main'; 
 
 export interface NovaSettings {
 	mySetting: string;
@@ -25,10 +25,9 @@ export class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.createEl('h2', {text: 'Nova Plugin Settings'});
 
-
 		new Setting(containerEl)
 			.setName('"Got Wrong" questions folder')
-			.setDesc('Vault-relative folder where imported question notes will be saved. The folder is created automatically if it does not exist.')
+			.setDesc('Vault-relative folder where imported question notes will be saved.')
 			.addText(text => text
 				.setPlaceholder('Got Wrong')
 				.setValue(this.plugin.settings.wrongQuestionsFolder)

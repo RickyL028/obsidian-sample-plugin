@@ -1,10 +1,10 @@
 {
-	"id": "Nova",
+	"id": "obsidian-nova",
 	"name": "Nova",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
 	"description": "Ricky made some random stuff.",
-	"author": "Obsidian",
+	"author": "Ricky",
 	"authorUrl": "https://obsidian.md",
 	"fundingUrl": "https://obsidian.md/pricing",
 	"isDesktopOnly": false

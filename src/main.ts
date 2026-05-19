@@ -1,5 +1,5 @@
-import {App, Editor, MarkdownView, Modal, Notice, Plugin, Setting, moment} from 'obsidian';
-import {DEFAULT_SETTINGS, NovaSettings, SampleSettingTab} from "./settings";
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, Setting, moment, TFolder } from 'obsidian';
+import { DEFAULT_SETTINGS, NovaSettings, SampleSettingTab } from "./settings";
 
 export default class Nova extends Plugin {
 	settings: NovaSettings;
@@ -11,7 +11,6 @@ export default class Nova extends Plugin {
 			new ImportQuestionsModal(this.app, this).open();
 		});
 
-
 		this.addCommand({
 			id: 'import-wrong-questions-json',
 			name: 'Import wrong questions from JSON',
@@ -21,8 +20,6 @@ export default class Nova extends Plugin {
 		});
 
 		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
 	onunload() {}
@@ -56,6 +53,7 @@ interface QuestionsJson {
 	questions: Question[];
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function toYamlTopics(topic: string | string[] | undefined): string {
 	if (!topic) return '';
@@ -64,8 +62,16 @@ function toYamlTopics(topic: string | string[] | undefined): string {
 }
 
 function sanitizeFilename(name: string): string {
-	
+	// Removes characters illegal in Windows/Mac/Linux filenames and Obsidian links
 	return name.replace(/[\\/:*?"<>|#^[\]]/g, '-').trim();
+}
+
+function getQuestionSnippet(question: string, wordCount: number = 5): string {
+	if (!question) return "Untitled Question";
+	// Remove markdown headers or bolding for the title snippet
+	const cleanQ = question.replace(/[#*`>]/g, '').trim();
+	const words = cleanQ.split(/\s+/);
+	return words.slice(0, wordCount).join(' ');
 }
 
 function buildMarkdown(q: Question, creationDate: string): string {
@@ -81,7 +87,7 @@ reviewed: ${q.reviewed ?? ''}
 mastered: ${q.mastered ?? ''}
 marks_rewarded: ${q.marks_rewarded ?? ''}
 full_marks: ${q.full_marks ?? ''}
-notes: 
+notes: ${q.note ?? ''}
 
 ---
 ### Question
@@ -98,6 +104,7 @@ ${q.question ?? ''}
 `;
 }
 
+// ── Modal ────────────────────────────────────────────────────────────────────
 
 class ImportQuestionsModal extends Modal {
 	private plugin: Nova;
@@ -109,55 +116,37 @@ class ImportQuestionsModal extends Modal {
 	}
 
 	onOpen() {
-		const {contentEl} = this;
+		const { contentEl } = this;
 		contentEl.empty();
 		contentEl.addClass('import-questions-modal');
 
-		// ── Header ────────────────────────────────────────────────────────────
-		contentEl.createEl('h2', {text: 'Import "Got Wrong" Questions'});
+		contentEl.createEl('h2', { text: 'Import "Got Wrong" Questions' });
 		contentEl.createEl('p', {
-			text: 'Paste your JSON below. Each question will be saved as a separate note in your configured folder.',
+			text: 'Paste JSON. Files will be named by question snippet + topic and sorted into subject folders.',
 			cls: 'setting-item-description'
 		});
 
-		// ── Folder info ───────────────────────────────────────────────────────
-		const folderPath = this.plugin.settings.wrongQuestionsFolder ?? 'Got Wrong';
+		const rootFolderPath = this.plugin.settings.wrongQuestionsFolder ?? 'Got Wrong';
 		contentEl.createEl('p', {
-			text: `📁 Destination folder: ${folderPath}`,
+			text: `📁 Root destination: ${rootFolderPath}`,
 			cls: 'setting-item-description'
 		});
 
-		// ── Textarea ──────────────────────────────────────────────────────────
 		this.textArea = contentEl.createEl('textarea', {
-			placeholder: '{\n  "questions": [\n    {\n      "subject": "Math",\n      "topic": ["Algebra"],\n      "question": "Solve x...",\n      "answer": "x = 2"\n    }\n  ]\n}',
+			placeholder: 'Paste JSON here...',
 			cls: 'import-questions-textarea'
 		});
-		this.textArea.style.cssText = `
-			width: 100%;
-			min-height: 260px;
-			font-family: var(--font-monospace);
-			font-size: 13px;
-			resize: vertical;
-			margin: 8px 0 12px;
-			padding: 10px;
-			border-radius: 6px;
-			border: 1px solid var(--background-modifier-border);
-			background: var(--background-secondary);
-			color: var(--text-normal);
-			box-sizing: border-box;
-		`;
+		this.textArea.style.cssText = `width: 100%; min-height: 260px; font-family: var(--font-monospace); font-size: 13px; resize: vertical; margin: 8px 0 12px; padding: 10px; border-radius: 6px; border: 1px solid var(--background-modifier-border); background: var(--background-secondary); color: var(--text-normal); box-sizing: border-box;`;
 
-		// ── Buttons ───────────────────────────────────────────────────────────
-		const btnRow = contentEl.createDiv({cls: 'modal-button-container'});
-		btnRow.style.cssText = 'display:flex;gap:8px;justify-content:flex-end;margin-top:4px;';
+		const btnRow = contentEl.createDiv({ cls: 'modal-button-container' });
+		btnRow.style.cssText = 'display:flex; gap:8px; justify-content:flex-end; margin-top:4px;';
 
-		const cancelBtn = btnRow.createEl('button', {text: 'Cancel'});
+		const cancelBtn = btnRow.createEl('button', { text: 'Cancel' });
 		cancelBtn.addEventListener('click', () => this.close());
 
-		const importBtn = btnRow.createEl('button', {text: 'Import Questions', cls: 'mod-cta'});
+		const importBtn = btnRow.createEl('button', { text: 'Import Questions', cls: 'mod-cta' });
 		importBtn.addEventListener('click', () => this.handleImport());
 
-		// Focus textarea on open
 		setTimeout(() => this.textArea.focus(), 50);
 	}
 
@@ -167,88 +156,72 @@ class ImportQuestionsModal extends Modal {
 
 	private async handleImport() {
 		const raw = this.textArea.value.trim();
-
 		if (!raw) {
 			new Notice('⚠️ Please paste your JSON first.');
 			return;
 		}
 
-		// ── Parse ─────────────────────────────────────────────────────────────
 		let parsed: QuestionsJson;
 		try {
 			parsed = JSON.parse(raw) as QuestionsJson;
 		} catch (e) {
-			new Notice('❌ Invalid JSON — please check your input and try again.');
-			console.error('[ImportQuestions] JSON parse error:', e);
+			new Notice('❌ Invalid JSON.');
 			return;
 		}
 
-		if (!parsed.questions || !Array.isArray(parsed.questions) || parsed.questions.length === 0) {
-			new Notice('⚠️ JSON must have a non-empty "questions" array.');
+		if (!parsed.questions || !Array.isArray(parsed.questions)) {
+			new Notice('⚠️ JSON must have a "questions" array.');
 			return;
 		}
 
-		// ── Ensure folder exists ──────────────────────────────────────────────
-		const folderPath = (this.plugin.settings.wrongQuestionsFolder ?? 'past').replace(/\/$/, '');
-		const {vault} = this.app;
-
-		if (!vault.getAbstractFileByPath(folderPath)) {
-			await vault.createFolder(folderPath);
-		}
-
-		// ── Create notes ──────────────────────────────────────────────────────
+		const { vault } = this.app;
+		const rootPath = (this.plugin.settings.wrongQuestionsFolder ?? 'Got Wrong').replace(/\/$/, '');
 		const creationDate = moment().format('YYYY-MM-DD HH:mm');
+		
 		let created = 0;
 		let skipped = 0;
 
+		// 1. Ensure root folder exists
+		if (!vault.getAbstractFileByPath(rootPath)) {
+			await vault.createFolder(rootPath);
+		}
+
 		for (const q of parsed.questions) {
-			if (!q.subject) {
-				console.warn('[ImportQuestions] Skipping question with no subject:', q);
-				skipped++;
-				continue;
-			}
-
-			const baseTitle = sanitizeFilename(`I got this wrong - ${q.subject}${q.topic ? ' - ' + (Array.isArray(q.topic) ? q.topic[0] : q.topic) : ''}`);
-			const filePath = `${folderPath}/${baseTitle}.md`;
-
-			// Avoid overwriting — append a counter if file exists
-			let finalPath = filePath;
-			let counter = 1;
-			while (vault.getAbstractFileByPath(finalPath)) {
-				finalPath = `${folderPath}/${baseTitle} (${counter}).md`;
-				counter++;
-			}
-
-			const content = buildMarkdown(q, creationDate);
-
 			try {
+				const subject = q.subject ? q.subject.trim() : "Unsorted";
+				const topic = Array.isArray(q.topic) ? q.topic[0] : (q.topic ?? "");
+				
+				// 2. Create Subject Subfolder
+				const subjectPath = `${rootPath}/${sanitizeFilename(subject)}`;
+				if (!vault.getAbstractFileByPath(subjectPath)) {
+					await vault.createFolder(subjectPath);
+				}
+
+				// 3. Generate Filename (Snippet + Topic)
+				const snippet = getQuestionSnippet(q.question ?? "");
+				const topicSuffix = topic ? ` - ${topic}` : "";
+				const baseName = sanitizeFilename(`${snippet}${topicSuffix}`);
+				
+				let finalPath = `${subjectPath}/${baseName}.md`;
+
+				// 4. Handle duplicates
+				let counter = 1;
+				while (vault.getAbstractFileByPath(finalPath)) {
+					finalPath = `${subjectPath}/${baseName} (${counter}).md`;
+					counter++;
+				}
+
+				const content = buildMarkdown(q, creationDate);
 				await vault.create(finalPath, content);
 				created++;
+
 			} catch (err) {
-				console.error('[ImportQuestions] Failed to create file:', finalPath, err);
+				console.error('[ImportQuestions] Error creating note:', err);
 				skipped++;
 			}
 		}
 
-		// ── Done ──────────────────────────────────────────────────────────────
-		new Notice(`✅ Created ${created} note${created !== 1 ? 's' : ''}${skipped ? ` (${skipped} skipped)` : ''} in "${folderPath}"`);
+		new Notice(`✅ Created ${created} notes in subject subfolders.`);
 		this.close();
-	}
-}
-
-// ── Original sample modal (kept for existing commands) ───────────────────────
-
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
-
-	onOpen() {
-		const {contentEl} = this;
-	}
-
-	onClose() {
-		const {contentEl} = this;
-		contentEl.empty();
 	}
 }
