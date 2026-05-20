@@ -9,7 +9,7 @@ export interface Lv999Settings {
 
 export const DEFAULT_SETTINGS: Lv999Settings = {
     taskFolder: 'Lv999_Tasks',
-    level: 1,
+    level: 1,           // was missing — caused XP formula to use undefined
     currentXp: 0,
     diamonds: 0,
     goldCoins: 0,
@@ -17,15 +17,15 @@ export const DEFAULT_SETTINGS: Lv999Settings = {
 };
 
 export interface TaskData {
-    id: string; 
+    id: string;
     name: string;
     type: 'daily' | 'weekly' | 'strategic' | 'negative' | 'general';
-    dueDate: string; 
-    repetition: string; 
+    dueDate: string;        // YYYY-MM-DD local date string
+    repetition: string;     // 'none' | 'daily' | 'weekly-mon' … 'weekly-sun'
     rewardXp: number;
     rewardDiamond: number;
     rewardGold: number;
     rewardSilver: number;
-    completed: boolean;
-    file: any; 
+    completed: boolean;     // only meaningful for repetition === 'none'
+    file: any;
 }

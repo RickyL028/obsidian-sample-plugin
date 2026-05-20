@@ -65,6 +65,13 @@ export class DashboardView extends ItemView {
         const reqXp = 8 + (0.037 * this.plugin.settings.level);
         const xpPercent = Math.min(100, (this.plugin.settings.currentXp / reqXp) * 100);
 
+        // Compute today string here too for the header stat pill.
+        const nowH = new Date();
+        const todayStrH = `${nowH.getFullYear()}-${String(nowH.getMonth() + 1).padStart(2, '0')}-${String(nowH.getDate()).padStart(2, '0')}`;
+        const dueTodayCount = activeTasks.filter(
+            t => t.type === 'daily' || t.dueDate === todayStrH
+        ).length;
+
         header.innerHTML = `
             <div class="lv999-profile">
                 <div class="lv999-avatar">🛡️</div>
@@ -84,8 +91,8 @@ export class DashboardView extends ItemView {
                         <span class="pill-lbl">Active</span>
                     </div>
                     <div class="lv999-stat-pill daily-count">
-                        <span class="pill-val">${activeTasks.filter(t => t.type === 'daily').length}</span>
-                        <span class="pill-lbl">Daily</span>
+                        <span class="pill-val">${dueTodayCount}</span>
+                        <span class="pill-lbl">Due today</span>
                     </div>
                 </div>
             </div>
@@ -108,6 +115,16 @@ export class DashboardView extends ItemView {
         // ── Grid ─────────────────────────────────────────────────────
         const grid = container.createDiv('lv999-grid');
 
+        // Today's date string (local time) used to surface "due today" tasks.
+        const now = new Date();
+        const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+        // Daily panel shows: tasks typed 'daily' + any other task due today.
+        // Tasks due today still appear in their own panel too (intentional).
+        const dailyPanelTasks = activeTasks.filter(
+            t => t.type === 'daily' || (t.dueDate === todayStr && t.type !== 'daily')
+        );
+
         // Left col: General (Inbox) → Weekly
         const leftCol = grid.createDiv('lv999-col lv999-col-left');
         this.renderTaskPanel(leftCol, '📥 Inbox', activeTasks.filter(t => t.type === 'general' || !t.type), 'panel-general', 'general');
@@ -115,7 +132,7 @@ export class DashboardView extends ItemView {
 
         // Center col: Daily Quests — dominant
         const centerCol = grid.createDiv('lv999-col lv999-col-center');
-        this.renderDailyPanel(centerCol, activeTasks.filter(t => t.type === 'daily'));
+        this.renderDailyPanel(centerCol, dailyPanelTasks);
 
         // Right col: Strategic Goals → Forbidden Actions
         const rightCol = grid.createDiv('lv999-col lv999-col-right');
