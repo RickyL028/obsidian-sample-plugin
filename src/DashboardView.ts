@@ -13,6 +13,7 @@ export class DashboardView extends ItemView {
 
     activeTab: 'quests' | 'analytics' = 'quests';
     selectedMetric: 'study' | 'xp' | 'diamonds' | 'coins' = 'study';
+    selectedRange: 'weekly' | 'monthly' | 'alltime' = 'weekly';
 
     requestRender = debounce(this.renderDashboard.bind(this), 200);
 
@@ -31,8 +32,7 @@ export class DashboardView extends ItemView {
         this.registerEvent(this.app.vault.on('create', (file) => this.onTaskFileChanged(file)));
         this.registerEvent(this.app.vault.on('delete', (file) => this.onTaskFileChanged(file)));
         this.registerEvent(this.app.vault.on('rename', (file) => this.onTaskFileChanged(file)));
-        
-        // Listen to timer events from the main plugin
+
         this.plugin.onTimerTick = (sessionSecs, todaySecs) => {
             this.updateTimerDisplay(sessionSecs, todaySecs);
         };
@@ -44,7 +44,6 @@ export class DashboardView extends ItemView {
     }
 
     async onClose() {
-        // Clean up timer callbacks to prevent leaks
         this.plugin.onTimerTick = undefined;
         this.plugin.onTimerStateChange = undefined;
     }
@@ -70,7 +69,6 @@ export class DashboardView extends ItemView {
         await this.plugin.saveSettings();
         await this.taskManager.completeTask(task);
 
-        // Record reward in daily logs!
         const todayStr = DailyLogger.getTodayStr();
         const currentLog = await this.plugin.dailyLogger.getLog(todayStr);
         await this.plugin.dailyLogger.updateLog(todayStr, {
@@ -92,16 +90,15 @@ export class DashboardView extends ItemView {
             const s = sessionSecs % 60;
             sessionTimeEl.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         }
-        
+
         const todayAccumEl = this.contentEl.querySelector('#lv999-timer-today-accum');
         if (todayAccumEl) {
             const todayMins = Math.floor(todaySecs / 60);
             todayAccumEl.textContent = `Today: ${todayMins}m`;
         }
-        
+
         const yieldProgressEl = this.contentEl.querySelector('#lv999-timer-yield-progress') as HTMLElement;
         if (yieldProgressEl) {
-            // 5 minutes is 300 seconds
             const percent = ((todaySecs % 300) / 300) * 100;
             yieldProgressEl.style.width = `${percent}%`;
         }
@@ -130,7 +127,6 @@ export class DashboardView extends ItemView {
         const tasks = await this.taskManager.getTasks();
         const activeTasks = tasks.filter(t => !t.completed);
 
-        // ── Header Panel ─────────────────────────────────────────────
         const header = container.createDiv('lv999-header-panel');
         const reqXp = 8 + (0.037 * this.plugin.settings.level);
         const xpPercent = Math.min(100, (this.plugin.settings.currentXp / reqXp) * 100);
@@ -141,7 +137,6 @@ export class DashboardView extends ItemView {
             t => t.type === 'daily' || t.dueDate === todayStrH
         ).length;
 
-        // Render Header Elements
         header.innerHTML = `
             <div class="lv999-profile">
                 <div class="lv999-level-info">
@@ -154,7 +149,6 @@ export class DashboardView extends ItemView {
                 </div>
             </div>
             <div class="lv999-header-center">
-                <!-- Study Timer HUD widget -->
                 <div class="lv999-study-timer-hud">
                     <button class="timer-play-btn" id="lv999-timer-toggle-btn" title="Start Study Timer">▶</button>
                     <div class="timer-display-group">
@@ -186,23 +180,19 @@ export class DashboardView extends ItemView {
             </div>
         `;
 
-        // Bind Play/Pause timer toggle button
         header.querySelector('#lv999-timer-toggle-btn')?.addEventListener('click', () => {
             this.plugin.toggleStudyTimer();
         });
-        
-        // Initialize timer HUD visuals
+
         this.updateTimerDisplay(this.plugin.studySessionSeconds, this.plugin.settings.todayStudySeconds);
         this.updateTimerStateUI();
 
-        // Bind New Quest button
         header.querySelector('#lv999-add-task-btn')?.addEventListener('click', () => {
             new TaskModal(this.app, this.plugin, null, 'general', async (data) => {
                 await this.taskManager.createTask(data);
             }).open();
         });
 
-        // ── Sub-Tabs Navigation ──────────────────────────────────────
         const tabNav = container.createDiv('lv999-sub-tabs-container');
         tabNav.innerHTML = `
             <div class="lv999-sub-tabs">
@@ -221,7 +211,6 @@ export class DashboardView extends ItemView {
             this.renderDashboard();
         });
 
-        // ── Tab Contents ─────────────────────────────────────────────
         const contentArea = container.createDiv('lv999-tab-content');
 
         if (this.activeTab === 'quests') {
@@ -231,28 +220,23 @@ export class DashboardView extends ItemView {
         }
     }
 
-    // ── Render Quests Tab ──────────────────────────────────────────
     async renderQuestsGrid(parent: HTMLElement, activeTasks: TaskData[]) {
         const grid = parent.createDiv('lv999-grid');
 
         const now = new Date();
         const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-        // Daily panel shows: tasks typed 'daily' + any other task due today.
         const dailyPanelTasks = activeTasks.filter(
             t => (t.type as string) === 'daily' || (t.dueDate === todayStr && (t.type as string) !== 'daily')
         );
 
-        // Left col: General (Inbox) → Weekly
         const leftCol = grid.createDiv('lv999-col lv999-col-left');
         this.renderTaskPanel(leftCol, 'Inbox', activeTasks.filter(t => t.type === 'general' || !t.type), 'panel-general', 'general');
         this.renderTaskPanel(leftCol, 'Weekly', activeTasks.filter(t => t.type === 'weekly'), 'panel-weekly', 'weekly');
 
-        // Center col: Daily Quests — dominant
         const centerCol = grid.createDiv('lv999-col lv999-col-center');
         this.renderDailyPanel(centerCol, dailyPanelTasks);
 
-        // Right col: Strategic Goals → Forbidden Actions
         const rightCol = grid.createDiv('lv999-col lv999-col-right');
         this.renderTaskPanel(rightCol, 'Goals', activeTasks.filter(t => t.type === 'strategic'), 'panel-strategic', 'strategic');
         this.renderTaskPanel(rightCol, 'Negative', activeTasks.filter(t => t.type === 'negative'), 'panel-negative', 'negative');
@@ -364,56 +348,155 @@ export class DashboardView extends ItemView {
         });
     }
 
+    // ── Analytics Helpers ──────────────────────────────────────────
+
+    /**
+     * Build a padded array of DailyLogData for the last N calendar days.
+     * Days with no log entry are filled with zeroed records.
+     */
+    private buildPaddedDays(allLogs: DailyLogData[], days: number): DailyLogData[] {
+        const result: DailyLogData[] = [];
+        for (let i = days - 1; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            const existing = allLogs.find(l => l.dateStr === dateStr);
+            result.push(existing ?? {
+                dateStr,
+                studySeconds: 0,
+                xpEarned: 0,
+                diamondsEarned: 0,
+                goldEarned: 0,
+                silverEarned: 0
+            });
+        }
+        return result;
+    }
+
+    /**
+     * For all-time view, aggregate individual day logs into weekly buckets.
+     * Each bucket's dateStr is set to the Monday of that week (ISO label).
+     */
+    private aggregateIntoWeeks(allLogs: DailyLogData[]): DailyLogData[] {
+        if (allLogs.length === 0) return [];
+
+        // Sort ascending
+        const sorted = [...allLogs].sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+
+        const buckets = new Map<string, DailyLogData>();
+
+        sorted.forEach(log => {
+            const parts = log.dateStr.split('-').map(Number);
+            const d = new Date(parts[0]!, parts[1]! - 1, parts[2]!);
+            // Monday of this week
+            const day = d.getDay(); // 0=Sun
+            const diff = (day === 0) ? -6 : 1 - day;
+            const monday = new Date(d);
+            monday.setDate(d.getDate() + diff);
+            const key = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+
+            const existing = buckets.get(key);
+            if (existing) {
+                existing.studySeconds += log.studySeconds;
+                existing.xpEarned += log.xpEarned;
+                existing.diamondsEarned += log.diamondsEarned;
+                existing.goldEarned += log.goldEarned;
+                existing.silverEarned += log.silverEarned;
+            } else {
+                buckets.set(key, {
+                    dateStr: key,
+                    studySeconds: log.studySeconds,
+                    xpEarned: log.xpEarned,
+                    diamondsEarned: log.diamondsEarned,
+                    goldEarned: log.goldEarned,
+                    silverEarned: log.silverEarned
+                });
+            }
+        });
+
+        return Array.from(buckets.values()).sort((a, b) => a.dateStr.localeCompare(b.dateStr));
+    }
+
+    /**
+     * Returns the dataset and a label/period description for the current selectedRange.
+     * For all-time the data is week-aggregated; for weekly/monthly it's individual days.
+     */
+    private async getDataForRange(allLogs: DailyLogData[]): Promise<{
+        data: DailyLogData[];
+        periodLabel: string;
+        pointCount: number;
+        isWeeklyBuckets: boolean;
+    }> {
+        switch (this.selectedRange) {
+            case 'weekly':
+                return {
+                    data: this.buildPaddedDays(allLogs, 7),
+                    periodLabel: 'last 7 days',
+                    pointCount: 7,
+                    isWeeklyBuckets: false
+                };
+            case 'monthly':
+                return {
+                    data: this.buildPaddedDays(allLogs, 30),
+                    periodLabel: 'last 30 days',
+                    pointCount: 30,
+                    isWeeklyBuckets: false
+                };
+            case 'alltime': {
+                // Use every real log we have, aggregated by week
+                const weekBuckets = this.aggregateIntoWeeks(allLogs);
+                // Guarantee at least one bucket so the graph is never empty
+                if (weekBuckets.length === 0) {
+                    const todayStr = DailyLogger.getTodayStr();
+                    weekBuckets.push({ dateStr: todayStr, studySeconds: 0, xpEarned: 0, diamondsEarned: 0, goldEarned: 0, silverEarned: 0 });
+                }
+                return {
+                    data: weekBuckets,
+                    periodLabel: `all time (${weekBuckets.length} weeks)`,
+                    pointCount: weekBuckets.length,
+                    isWeeklyBuckets: true
+                };
+            }
+        }
+    }
+
     // ── Render Analytics & Graphs Tab ──────────────────────────────
     async renderAnalyticsDashboard(parent: HTMLElement) {
         const wrapper = parent.createDiv('lv999-analytics-container');
 
-        // Fetch logs
         const allLogs = await this.plugin.dailyLogger.getAllLogs();
-        
-        // Pad to guarantee exactly the last 7 calendar days are represented (gaps are filled with zeroed logs)
-        const last7DaysData: DailyLogData[] = [];
-        for (let i = 6; i >= 0; i--) {
-            const d = new Date();
-            d.setDate(d.getDate() - i);
-            const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-            
-            const existing = allLogs.find(l => l.dateStr === dateStr);
-            if (existing) {
-                last7DaysData.push(existing);
-            } else {
-                last7DaysData.push({
-                    dateStr,
-                    studySeconds: 0,
-                    xpEarned: 0,
-                    diamondsEarned: 0,
-                    goldEarned: 0,
-                    silverEarned: 0
-                });
-            }
-        }
+        const rangeInfo = await this.getDataForRange(allLogs);
+        const { data, periodLabel, isWeeklyBuckets } = rangeInfo;
 
-        // Render layout
         wrapper.innerHTML = `
             <div class="analytics-header">
                 <div class="analytics-title-wrap">
-                    <h3>7-Day Analytics & History</h3>
-                    <p class="analytics-subtitle">Track your focus time, quest completions, and loot stats.</p>
+                    <h3>Analytics & History</h3>
+                    <p class="analytics-subtitle">Showing ${periodLabel}${isWeeklyBuckets ? ' · weekly buckets' : ''}.</p>
                 </div>
+
+                <!-- Row 1: Metric toggles -->
                 <div class="metric-toggles">
                     <button class="metric-btn ${this.selectedMetric === 'study' ? 'active' : ''}" data-metric="study">📚 Study Time</button>
                     <button class="metric-btn ${this.selectedMetric === 'xp' ? 'active' : ''}" data-metric="xp">⚔️ XP Gained</button>
                     <button class="metric-btn ${this.selectedMetric === 'diamonds' ? 'active' : ''}" data-metric="diamonds">💎 Diamonds</button>
                     <button class="metric-btn ${this.selectedMetric === 'coins' ? 'active' : ''}" data-metric="coins">🪙 Coins</button>
                 </div>
-            </div>
-            
-            <div class="graph-card">
-                <div class="graph-wrapper" id="lv999-svg-graph-container">
-                    <!-- Custom SVG chart inserted here -->
+
+                <!-- Row 2: Range toggles -->
+                <div class="range-toggles">
+                    <button class="range-btn ${this.selectedRange === 'weekly' ? 'active' : ''}" data-range="weekly">7 Days</button>
+                    <button class="range-btn ${this.selectedRange === 'monthly' ? 'active' : ''}" data-range="monthly">30 Days</button>
+                    <button class="range-btn ${this.selectedRange === 'alltime' ? 'active' : ''}" data-range="alltime">All Time</button>
                 </div>
             </div>
-            
+
+            <div class="graph-card">
+                <div class="graph-wrapper" id="lv999-svg-graph-container">
+                    <!-- SVG chart inserted here -->
+                </div>
+            </div>
+
             <div class="analytics-cards-grid" id="lv999-analytics-summary-cards">
                 <!-- Summary cards generated here -->
             </div>
@@ -421,76 +504,101 @@ export class DashboardView extends ItemView {
 
         // Bind metric toggles
         wrapper.querySelectorAll('.metric-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', async (e) => {
                 const metric = (e.target as HTMLElement).getAttribute('data-metric') as any;
                 this.selectedMetric = metric;
-                
-                // Toggle active state in buttons
                 wrapper.querySelectorAll('.metric-btn').forEach(b => b.removeClass('active'));
                 (e.target as HTMLElement).addClass('active');
-                
-                // Re-render only graph and summaries
-                this.renderSVGGraph(wrapper.querySelector('#lv999-svg-graph-container') as HTMLElement, last7DaysData, metric);
-                this.renderSummaryCards(wrapper.querySelector('#lv999-analytics-summary-cards') as HTMLElement, last7DaysData, metric);
+                // Re-fetch range data in case it matters, then re-render sub-components
+                const fresh = await this.getDataForRange(allLogs);
+                this.renderSVGGraph(wrapper.querySelector('#lv999-svg-graph-container') as HTMLElement, fresh.data, metric, fresh.isWeeklyBuckets);
+                this.renderSummaryCards(wrapper.querySelector('#lv999-analytics-summary-cards') as HTMLElement, fresh.data, metric, fresh.periodLabel, fresh.isWeeklyBuckets);
             });
         });
 
-        // Initial render of graph and cards
-        this.renderSVGGraph(wrapper.querySelector('#lv999-svg-graph-container') as HTMLElement, last7DaysData, this.selectedMetric);
-        this.renderSummaryCards(wrapper.querySelector('#lv999-analytics-summary-cards') as HTMLElement, last7DaysData, this.selectedMetric);
+        // Bind range toggles — re-fetch & re-render everything
+        wrapper.querySelectorAll('.range-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const range = (e.target as HTMLElement).getAttribute('data-range') as any;
+                this.selectedRange = range;
+                wrapper.querySelectorAll('.range-btn').forEach(b => b.removeClass('active'));
+                (e.target as HTMLElement).addClass('active');
+
+                const fresh = await this.getDataForRange(allLogs);
+
+                // Update subtitle
+                const subtitle = wrapper.querySelector('.analytics-subtitle');
+                if (subtitle) {
+                    subtitle.textContent = `Showing ${fresh.periodLabel}${fresh.isWeeklyBuckets ? ' · weekly buckets' : ''}.`;
+                }
+
+                this.renderSVGGraph(wrapper.querySelector('#lv999-svg-graph-container') as HTMLElement, fresh.data, this.selectedMetric, fresh.isWeeklyBuckets);
+                this.renderSummaryCards(wrapper.querySelector('#lv999-analytics-summary-cards') as HTMLElement, fresh.data, this.selectedMetric, fresh.periodLabel, fresh.isWeeklyBuckets);
+            });
+        });
+
+        // Initial renders
+        this.renderSVGGraph(wrapper.querySelector('#lv999-svg-graph-container') as HTMLElement, data, this.selectedMetric, isWeeklyBuckets);
+        this.renderSummaryCards(wrapper.querySelector('#lv999-analytics-summary-cards') as HTMLElement, data, this.selectedMetric, periodLabel, isWeeklyBuckets);
     }
 
-    renderSVGGraph(parent: HTMLElement, logs: DailyLogData[], metric: string) {
+    renderSVGGraph(parent: HTMLElement, logs: DailyLogData[], metric: string, isWeeklyBuckets: boolean) {
         parent.empty();
-        
+
         let getValues: (log: DailyLogData) => number[];
         let strokeColor = '';
         let fillGradientId = '';
         let dualLine = false;
-        
+        let unitLabel = '';
+
         if (metric === 'study') {
             getValues = (l) => [Math.round(l.studySeconds / 60)];
             strokeColor = 'var(--interactive-accent)';
             fillGradientId = 'study-grad';
+            unitLabel = isWeeklyBuckets ? 'mins (week total)' : 'minutes';
         } else if (metric === 'xp') {
             getValues = (l) => [parseFloat(l.xpEarned.toFixed(1))];
             strokeColor = '#00bcd4';
             fillGradientId = 'xp-grad';
+            unitLabel = isWeeklyBuckets ? 'XP (week total)' : 'XP';
         } else if (metric === 'diamonds') {
             getValues = (l) => [l.diamondsEarned];
             strokeColor = '#e91e63';
             fillGradientId = 'diamonds-grad';
-        } else { // coins
+            unitLabel = isWeeklyBuckets ? '💎 (week total)' : 'diamonds';
+        } else {
             getValues = (l) => [l.goldEarned, l.silverEarned];
             dualLine = true;
+            unitLabel = isWeeklyBuckets ? 'coins (week total)' : 'coins';
         }
 
-        // Determine Y axis ceiling
         let maxVal = 10;
         logs.forEach(l => {
-            const vals = getValues(l);
-            vals.forEach(v => {
-                if (v > maxVal) maxVal = v;
-            });
+            getValues(l).forEach(v => { if (v > maxVal) maxVal = v; });
         });
-        
         maxVal = Math.ceil(maxVal * 1.15);
-        if (maxVal === 0 || isNaN(maxVal)) maxVal = 10;
+        if (!maxVal || isNaN(maxVal)) maxVal = 10;
 
         const width = 600;
         const height = 220;
         const paddingLeft = 45;
         const paddingRight = 20;
         const paddingTop = 20;
-        const paddingBottom = 35;
-        
+        const paddingBottom = 38;
+
         const chartWidth = width - paddingLeft - paddingRight;
         const chartHeight = height - paddingTop - paddingBottom;
 
-        // Custom, wow, responsive SVG template
+        // How often to draw an X-axis label so text doesn't overlap
+        // weekly=every1, monthly=every5, alltime depends on bucket count
+        const n = logs.length;
+        let labelEvery = 1;
+        if (n > 60) labelEvery = Math.ceil(n / 12);
+        else if (n > 20) labelEvery = 5;
+        else if (n > 10) labelEvery = 3;
+
         let svgContent = `<svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="overflow: visible;">`;
-        
-        // Define gorgeous gradients
+
         svgContent += `
             <defs>
                 <linearGradient id="study-grad" x1="0" y1="0" x2="0" y2="1">
@@ -512,206 +620,222 @@ export class DashboardView extends ItemView {
             </defs>
         `;
 
-        // Horizontal Gridlines & Y-axis labels
+        // Gridlines + Y-axis labels
         const gridLinesCount = 5;
         for (let i = 0; i < gridLinesCount; i++) {
             const ratio = i / (gridLinesCount - 1);
             const y = height - paddingBottom - ratio * chartHeight;
             const gridVal = (ratio * maxVal).toFixed(0);
-            
             svgContent += `
                 <line x1="${paddingLeft}" y1="${y}" x2="${width - paddingRight}" y2="${y}" stroke="var(--background-modifier-border)" stroke-dasharray="4 4" stroke-opacity="0.65" />
                 <text x="${paddingLeft - 10}" y="${y + 4}" font-size="9" font-weight="600" fill="var(--text-muted)" text-anchor="end">${gridVal}</text>
             `;
         }
 
-        // Project Coordinates
-        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const points: { x: number; y: number; val: number; dateStr: string; label: string }[][] = dualLine ? [[], []] : [[]];
-        
+        // X-axis label helpers
+        const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const DAYS_SHORT   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+        /**
+         * Returns the primary (top) and secondary (bottom) x-axis label for a data point.
+         * For weekly  → day abbrev / MM-DD
+         * For monthly → day abbrev / MM-DD  (sparser via labelEvery)
+         * For alltime → "Mon DD" / Month abbrev  (week buckets)
+         */
+        const getXLabels = (dateStr: string): { primary: string; secondary: string } => {
+            const parts = dateStr.split('-').map(Number);
+            const d = new Date(parts[0]!, parts[1]! - 1, parts[2]!);
+            if (isWeeklyBuckets) {
+                return {
+                    primary: `${MONTHS_SHORT[d.getMonth()]!} ${d.getDate()}`,
+                    secondary: String(d.getFullYear())
+                };
+            }
+            return {
+                primary: DAYS_SHORT[d.getDay()] ?? '',
+                secondary: dateStr.slice(5)
+            };
+        };
+
+        // Build point arrays
+        const points: { x: number; y: number; val: number; dateStr: string; primary: string; secondary: string }[][] =
+            dualLine ? [[], []] : [[]];
+
         logs.forEach((log, index) => {
             const ratioX = logs.length > 1 ? index / (logs.length - 1) : 0.5;
             const x = paddingLeft + ratioX * chartWidth;
-            
-            // local time safe parsing
-            const dateParts = log.dateStr.split('-').map(Number);
-            const yVal = dateParts[0] || 0;
-            const mVal = dateParts[1] || 1;
-            const dVal = dateParts[2] || 1;
-            const date = new Date(yVal, mVal - 1, dVal);
-            const dayLabel = daysOfWeek[date.getDay()] || '';
-            
+            const { primary, secondary } = getXLabels(log.dateStr);
+
             const vals = getValues(log);
             vals.forEach((val, valIdx) => {
                 const ratioY = val / maxVal;
                 const y = height - paddingBottom - ratioY * chartHeight;
-                const ptsArray = points[valIdx];
-                if (ptsArray) {
-                    ptsArray.push({ x, y, val, dateStr: log.dateStr, label: dayLabel });
-                }
+                const arr = points[valIdx];
+                if (arr) arr.push({ x, y, val, dateStr: log.dateStr, primary, secondary });
             });
         });
 
-        // Draw X-axis labels
+        // X-axis labels (sparse for dense datasets)
         const primaryPoints = points[0];
         if (primaryPoints) {
-            primaryPoints.forEach((pt) => {
+            primaryPoints.forEach((pt, idx) => {
+                if (idx % labelEvery !== 0 && idx !== primaryPoints.length - 1) return;
                 svgContent += `
-                    <text x="${pt.x}" y="${height - 18}" font-size="10" font-weight="700" fill="var(--text-normal)" text-anchor="middle">${pt.label}</text>
-                    <text x="${pt.x}" y="${height - 5}" font-size="8.5" font-weight="500" fill="var(--text-faint)" text-anchor="middle">${pt.dateStr.slice(5)}</text>
+                    <text x="${pt.x}" y="${height - 20}" font-size="10" font-weight="700" fill="var(--text-normal)" text-anchor="middle">${pt.primary}</text>
+                    <text x="${pt.x}" y="${height - 6}" font-size="8.5" font-weight="500" fill="var(--text-faint)" text-anchor="middle">${pt.secondary}</text>
                 `;
             });
         }
 
-        // Draw curves and shapes
+        // Draw dot radius based on density (smaller when many points)
+        const dotR   = n > 30 ? 3   : n > 14 ? 4 : 5;
+        const dotSW  = n > 30 ? 2   : n > 14 ? 2.5 : 3;
+        const lineSW = n > 30 ? 2.5 : n > 14 ? 3   : 3.5;
+
         if (!dualLine) {
             const pts = points[0];
             if (pts && pts.length > 0) {
-                const pt0 = pts[0];
-                const ptLast = pts[pts.length - 1];
-                if (pt0 && ptLast) {
-                    // Area Under Curve (Gradient)
-                    let areaPath = `M ${pt0.x} ${height - paddingBottom} `;
-                    pts.forEach(pt => { areaPath += `L ${pt.x} ${pt.y} `; });
-                    areaPath += `L ${ptLast.x} ${height - paddingBottom} Z`;
-                    
-                    // Line Path
-                    let linePath = `M ${pt0.x} ${pt0.y} `;
-                    for (let i = 1; i < pts.length; i++) {
-                        const pt = pts[i];
-                        if (pt) {
-                            linePath += `L ${pt.x} ${pt.y} `;
-                        }
-                    }
+                const pt0 = pts[0]!;
+                const ptLast = pts[pts.length - 1]!;
 
-                    svgContent += `<path d="${areaPath}" fill="url(#${fillGradientId})" />`;
-                    svgContent += `<path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 3px 6px color-mix(in srgb, ${strokeColor} 35%, transparent));" />`;
-                    
-                    // Circular Dots
+                // Area
+                let areaPath = `M ${pt0.x} ${height - paddingBottom} `;
+                pts.forEach(pt => { areaPath += `L ${pt.x} ${pt.y} `; });
+                areaPath += `L ${ptLast.x} ${height - paddingBottom} Z`;
+
+                // Line
+                let linePath = `M ${pt0.x} ${pt0.y} `;
+                for (let i = 1; i < pts.length; i++) {
+                    const pt = pts[i]!;
+                    linePath += `L ${pt.x} ${pt.y} `;
+                }
+
+                svgContent += `<path d="${areaPath}" fill="url(#${fillGradientId})" />`;
+                svgContent += `<path d="${linePath}" fill="none" stroke="${strokeColor}" stroke-width="${lineSW}" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 3px 6px color-mix(in srgb, ${strokeColor} 35%, transparent));" />`;
+
+                // Only draw dots when there are few enough points to be legible
+                if (n <= 60) {
                     pts.forEach(pt => {
                         svgContent += `
-                            <circle cx="${pt.x}" cy="${pt.y}" r="5" fill="var(--background-primary)" stroke="${strokeColor}" stroke-width="3" style="cursor: pointer;">
-                                <title>${pt.dateStr} (${pt.label})\n${pt.val} ${metric === 'study' ? 'minutes' : metric === 'xp' ? 'XP' : 'diamonds'}</title>
+                            <circle cx="${pt.x}" cy="${pt.y}" r="${dotR}" fill="var(--background-primary)" stroke="${strokeColor}" stroke-width="${dotSW}" style="cursor: pointer;">
+                                <title>${pt.dateStr} (${pt.primary})\n${pt.val} ${unitLabel}</title>
                             </circle>
                         `;
                     });
                 }
             }
         } else {
-            // Coins Dual Line
-            const colors = ['#ffc107', '#9e9e9e']; // Gold = Amber, Silver = Grey
-            const labels = ['Gold', 'Silver'];
-            
+            // Dual-line: Gold + Silver
+            const colors = ['#ffc107', '#9e9e9e'];
+            const labelNames = ['Gold', 'Silver'];
+
             points.forEach((pts, lineIdx) => {
-                const color = colors[lineIdx] || '#ffffff';
+                const color = colors[lineIdx] ?? '#fff';
                 if (pts && pts.length > 0) {
-                    const pt0 = pts[0];
-                    if (pt0) {
-                        // Line Path
-                        let linePath = `M ${pt0.x} ${pt0.y} `;
-                        for (let i = 1; i < pts.length; i++) {
-                            const pt = pts[i];
-                            if (pt) {
-                                linePath += `L ${pt.x} ${pt.y} `;
-                            }
-                        }
-                        
-                        svgContent += `<path d="${linePath}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 3px 6px color-mix(in srgb, ${color} 30%, transparent));" />`;
-                        
-                        // Circular Dots
+                    const pt0 = pts[0]!;
+                    let linePath = `M ${pt0.x} ${pt0.y} `;
+                    for (let i = 1; i < pts.length; i++) {
+                        const pt = pts[i]!;
+                        linePath += `L ${pt.x} ${pt.y} `;
+                    }
+                    svgContent += `<path d="${linePath}" fill="none" stroke="${color}" stroke-width="${lineSW}" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0px 3px 6px color-mix(in srgb, ${color} 30%, transparent));" />`;
+
+                    if (n <= 60) {
                         pts.forEach(pt => {
                             svgContent += `
-                                <circle cx="${pt.x}" cy="${pt.y}" r="4.5" fill="var(--background-primary)" stroke="${color}" stroke-width="2.5" style="cursor: pointer;">
-                                    <title>${pt.dateStr} (${pt.label})\n${pt.val} ${labels[lineIdx] || ''} Coins</title>
+                                <circle cx="${pt.x}" cy="${pt.y}" r="${dotR}" fill="var(--background-primary)" stroke="${color}" stroke-width="${dotSW}" style="cursor: pointer;">
+                                    <title>${pt.dateStr} (${pt.primary})\n${pt.val} ${labelNames[lineIdx] ?? ''} Coins</title>
                                 </circle>
                             `;
                         });
                     }
                 }
             });
+
+            // Coin legend (top-right)
+            svgContent += `
+                <circle cx="${width - paddingRight - 70}" cy="${paddingTop + 6}" r="4" fill="#ffc107"/>
+                <text x="${width - paddingRight - 63}" y="${paddingTop + 10}" font-size="9" font-weight="600" fill="var(--text-muted)">Gold</text>
+                <circle cx="${width - paddingRight - 35}" cy="${paddingTop + 6}" r="4" fill="#9e9e9e"/>
+                <text x="${width - paddingRight - 28}" y="${paddingTop + 10}" font-size="9" font-weight="600" fill="var(--text-muted)">Silver</text>
+            `;
         }
 
         svgContent += `</svg>`;
         parent.innerHTML = svgContent;
     }
 
-    renderSummaryCards(parent: HTMLElement, logs: DailyLogData[], metric: string) {
+    renderSummaryCards(parent: HTMLElement, logs: DailyLogData[], metric: string, periodLabel: string, isWeeklyBuckets: boolean) {
         parent.empty();
-        
-        let sum = 0;
-        let avg = 0;
-        let todayVal = 0;
-        
+
+        const n = logs.length;
+        const dividerLabel = isWeeklyBuckets ? `${n} wk` : `${n} days`;
         const todayStr = DailyLogger.getTodayStr();
         const todayLog = logs.find(l => l.dateStr === todayStr);
 
-        let sumLabel = '';
-        let sumVal = '';
+        let totalVal = '';
         let avgVal = '';
         let todayDisplay = '';
+        let totalLabel = '';
         let themeClass = '';
 
         if (metric === 'study') {
             const totalSecs = logs.reduce((acc, l) => acc + l.studySeconds, 0);
-            sum = Math.round(totalSecs / 60);
-            avg = Math.round((totalSecs / 7) / 60);
-            todayVal = Math.round((todayLog?.studySeconds || 0) / 60);
-            
-            sumLabel = 'Total Study Time';
-            sumVal = `${sum} mins`;
-            avgVal = `${avg} mins/day`;
-            todayDisplay = `${todayVal} mins`;
+            const totalMins = Math.round(totalSecs / 60);
+            const avgMins = Math.round(totalMins / n);
+            const todayMins = Math.round((todayLog?.studySeconds ?? 0) / 60);
+
+            totalLabel = `Total Study Time (${periodLabel})`;
+            totalVal = totalMins >= 60
+                ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m`
+                : `${totalMins} mins`;
+            avgVal = `${avgMins} mins / ${isWeeklyBuckets ? 'week' : 'day'}`;
+            todayDisplay = `${todayMins} mins`;
             themeClass = 'study';
         } else if (metric === 'xp') {
-            sum = logs.reduce((acc, l) => acc + l.xpEarned, 0);
-            avg = sum / 7;
-            todayVal = todayLog?.xpEarned || 0;
-            
-            sumLabel = 'Total XP Earned';
-            sumVal = `${sum.toFixed(1)} XP`;
-            avgVal = `${avg.toFixed(1)} XP/day`;
-            todayDisplay = `${todayVal.toFixed(1)} XP`;
+            const total = logs.reduce((acc, l) => acc + l.xpEarned, 0);
+            totalLabel = `Total XP Earned (${periodLabel})`;
+            totalVal = `${total.toFixed(1)} XP`;
+            avgVal = `${(total / n).toFixed(1)} XP / ${isWeeklyBuckets ? 'week' : 'day'}`;
+            todayDisplay = `${(todayLog?.xpEarned ?? 0).toFixed(1)} XP`;
             themeClass = 'xp';
         } else if (metric === 'diamonds') {
-            sum = logs.reduce((acc, l) => acc + l.diamondsEarned, 0);
-            avg = sum / 7;
-            todayVal = todayLog?.diamondsEarned || 0;
-            
-            sumLabel = 'Total Diamonds Gained';
-            sumVal = `${sum} 💎`;
-            avgVal = `${avg.toFixed(1)} 💎/day`;
-            todayDisplay = `${todayVal} 💎`;
+            const total = logs.reduce((acc, l) => acc + l.diamondsEarned, 0);
+            totalLabel = `Total Diamonds (${periodLabel})`;
+            totalVal = `${total} 💎`;
+            avgVal = `${(total / n).toFixed(1)} 💎 / ${isWeeklyBuckets ? 'week' : 'day'}`;
+            todayDisplay = `${todayLog?.diamondsEarned ?? 0} 💎`;
             themeClass = 'diamonds';
-        } else { // coins
-            const goldSum = logs.reduce((acc, l) => acc + l.goldEarned, 0);
-            const silverSum = logs.reduce((acc, l) => acc + l.silverEarned, 0);
-            const goldToday = todayLog?.goldEarned || 0;
-            const silverToday = todayLog?.silverEarned || 0;
-            
-            sumLabel = 'Weekly Total Loot';
-            sumVal = `⭐️ ${goldSum}G  ·  🪙 ${silverSum}S`;
-            avgVal = `⭐️ ${(goldSum / 7).toFixed(1)}G  ·  🪙 ${(silverSum / 7).toFixed(1)}S /day`;
+        } else {
+            const goldTotal   = logs.reduce((acc, l) => acc + l.goldEarned, 0);
+            const silverTotal = logs.reduce((acc, l) => acc + l.silverEarned, 0);
+            const goldToday   = todayLog?.goldEarned ?? 0;
+            const silverToday = todayLog?.silverEarned ?? 0;
+
+            totalLabel = `Total Loot (${periodLabel})`;
+            totalVal = `⭐️ ${goldTotal}G  ·  🪙 ${silverTotal}S`;
+            avgVal = `⭐️ ${(goldTotal / n).toFixed(1)}G  ·  🪙 ${(silverTotal / n).toFixed(1)}S / ${isWeeklyBuckets ? 'week' : 'day'}`;
             todayDisplay = `⭐️ ${goldToday}G  ·  🪙 ${silverToday}S`;
             themeClass = 'coins';
         }
 
         parent.innerHTML = `
             <div class="analytics-card ${themeClass}">
-                <div class="card-title">Weekly Aggregate</div>
-                <div class="card-value">${sumVal}</div>
-                <div class="card-desc">${sumLabel} over the last 7 days</div>
+                <div class="card-title">Period Total</div>
+                <div class="card-value">${totalVal}</div>
+                <div class="card-desc">${totalLabel}</div>
             </div>
-            
+
             <div class="analytics-card ${themeClass}">
-                <div class="card-title">Daily Average</div>
+                <div class="card-title">Average · ${dividerLabel}</div>
                 <div class="card-value">${avgVal}</div>
-                <div class="card-desc">Your daily focus/rewards mean</div>
+                <div class="card-desc">Mean across ${dividerLabel}</div>
             </div>
-            
+
             <div class="analytics-card ${themeClass} today-highlight">
                 <div class="card-title">Today's Harvest</div>
                 <div class="card-value">${todayDisplay}</div>
-                <div class="card-desc">Gained today, resets at midnight 00:00</div>
+                <div class="card-desc">Gained today, resets at midnight</div>
             </div>
         `;
     }

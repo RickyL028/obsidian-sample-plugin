@@ -1453,3 +1453,145 @@
     color: var(--text-faint);
     line-height: 1.3;
 }
+/* ── Range Toggle Buttons (add alongside existing .metric-toggles styles) ── */
+
+.range-toggles {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.range-btn {
+    padding: 4px 14px;
+    border-radius: 20px;
+    border: 1.5px solid var(--background-modifier-border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    letter-spacing: 0.02em;
+}
+
+.range-btn:hover {
+    border-color: var(--interactive-accent);
+    color: var(--text-normal);
+}
+
+.range-btn.active {
+    background: var(--interactive-accent);
+    border-color: var(--interactive-accent);
+    color: var(--text-on-accent);
+}
+/* ── Full-screen dashboard layout fix ──────────────────────────────────────
+   Add these rules to your existing stylesheet (styles.css / lv999.css).
+   They override/extend the existing layout so the dashboard fills the
+   entire Obsidian leaf pane from edge to edge.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* 1. The Obsidian item-view content wrapper must be a flex column */
+.view-content:has(.lv999-dashboard) {
+    display: flex;
+    flex-direction: column;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+/* 2. Root dashboard container fills all remaining space */
+.lv999-dashboard {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;          /* critical: lets flex children shrink below content size */
+    height: 100%;
+    overflow: hidden;
+}
+
+/* 3. Header panel: fixed height, never grows */
+.lv999-header-panel {
+    flex: 0 0 auto;
+}
+
+/* 4. Tab nav: fixed height */
+.lv999-sub-tabs-container {
+    flex: 0 0 auto;
+}
+
+/* 5. Tab content area fills ALL remaining vertical space */
+.lv999-tab-content {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* 6. The quests grid fills the tab content height */
+.lv999-grid {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    height: 100%;
+    box-sizing: border-box;
+    align-items: stretch;   /* columns stretch to the same height */
+}
+
+/* 7. Each column fills the grid height */
+.lv999-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+}
+
+.lv999-col-left,
+.lv999-col-right {
+    flex: 0 0 280px;        /* fixed sidebar width — adjust to taste */
+}
+
+.lv999-col-center {
+    flex: 1 1 0;            /* center column takes all remaining width */
+    min-width: 0;
+}
+
+/* 8. Panels in left/right columns split available height equally */
+.lv999-col-left .lv999-panel,
+.lv999-col-right .lv999-panel {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 9. Center (daily) panel fills the full column height */
+.lv999-daily-panel {
+    flex: 1 1 0 !important;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* 10. Task lists scroll independently inside their panel */
+.lv999-panel .lv999-task-list {
+    flex: 1 1 0;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* 11. Panel headers never shrink */
+.lv999-panel-header {
+    flex: 0 0 auto;
+}
+
+/* 12. Analytics container fills the tab content too */
+.lv999-analytics-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
