@@ -22,7 +22,10 @@ function localDateStr(d: Date): string {
  * in timezones east of UTC (e.g. AEST = UTC+10 → one day behind).
  */
 function parseLocalDate(dateStr: string): Date {
-    const [y, m, d] = dateStr.split('-').map(Number);
+    const parts = dateStr.split('-').map(Number);
+    const y = parts[0] || 0;
+    const m = parts[1] || 1;
+    const d = parts[2] || 1;
     return new Date(y, m - 1, d);
 }
 

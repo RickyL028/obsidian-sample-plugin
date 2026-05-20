@@ -53,7 +53,7 @@ export class DashboardView extends ItemView {
     }
 
     async renderDashboard() {
-        const container = this.containerEl.children[1];
+        const container = this.contentEl;
         container.empty();
         container.addClass('lv999-dashboard');
 
@@ -74,7 +74,7 @@ export class DashboardView extends ItemView {
 
         header.innerHTML = `
             <div class="lv999-profile">
-                <div class="lv999-avatar">🛡️</div>
+                
                 <div class="lv999-level-info">
                     <div class="lv999-level-label">LEVEL ${this.plugin.settings.level}</div>
                     <div class="lv999-xp-bar-container">
@@ -92,15 +92,15 @@ export class DashboardView extends ItemView {
                     </div>
                     <div class="lv999-stat-pill daily-count">
                         <span class="pill-val">${dueTodayCount}</span>
-                        <span class="pill-lbl">Due today</span>
+                        <span class="pill-lbl">Due</span>
                     </div>
                 </div>
             </div>
             <div class="lv999-header-right">
                 <div class="lv999-currencies">
                     <div class="lv999-badge diamond" title="Diamonds">💎 <span>${this.plugin.settings.diamonds}</span></div>
-                    <div class="lv999-badge gold" title="Gold Coins">🪙 <span>${this.plugin.settings.goldCoins}</span></div>
-                    <div class="lv999-badge silver" title="Silver Coins">🥈 <span>${this.plugin.settings.silverCoins}</span></div>
+                    <div class="lv999-badge gold" title="Gold Coins">⭐️ <span>${this.plugin.settings.goldCoins}</span></div>
+                    <div class="lv999-badge silver" title="Silver Coins">🪙 <span>${this.plugin.settings.silverCoins}</span></div>
                 </div>
                 <button id="lv999-add-task-btn" class="lv999-action-btn">+ New Quest</button>
             </div>
@@ -122,13 +122,13 @@ export class DashboardView extends ItemView {
         // Daily panel shows: tasks typed 'daily' + any other task due today.
         // Tasks due today still appear in their own panel too (intentional).
         const dailyPanelTasks = activeTasks.filter(
-            t => t.type === 'daily' || (t.dueDate === todayStr && t.type !== 'daily')
+            t => (t.type as string) === 'daily' || (t.dueDate === todayStr && (t.type as string) !== 'daily')
         );
 
         // Left col: General (Inbox) → Weekly
         const leftCol = grid.createDiv('lv999-col lv999-col-left');
-        this.renderTaskPanel(leftCol, '📥 Inbox', activeTasks.filter(t => t.type === 'general' || !t.type), 'panel-general', 'general');
-        this.renderTaskPanel(leftCol, '📅 Weekly', activeTasks.filter(t => t.type === 'weekly'), 'panel-weekly', 'weekly');
+        this.renderTaskPanel(leftCol, 'Inbox', activeTasks.filter(t => t.type === 'general' || !t.type), 'panel-general', 'general');
+        this.renderTaskPanel(leftCol, 'Weekly', activeTasks.filter(t => t.type === 'weekly'), 'panel-weekly', 'weekly');
 
         // Center col: Daily Quests — dominant
         const centerCol = grid.createDiv('lv999-col lv999-col-center');
@@ -136,8 +136,8 @@ export class DashboardView extends ItemView {
 
         // Right col: Strategic Goals → Forbidden Actions
         const rightCol = grid.createDiv('lv999-col lv999-col-right');
-        this.renderTaskPanel(rightCol, '🎯 Goals', activeTasks.filter(t => t.type === 'strategic'), 'panel-strategic', 'strategic');
-        this.renderTaskPanel(rightCol, '🔥 Forbidden', activeTasks.filter(t => t.type === 'negative'), 'panel-negative', 'negative');
+        this.renderTaskPanel(rightCol, 'Goals', activeTasks.filter(t => t.type === 'strategic'), 'panel-strategic', 'strategic');
+        this.renderTaskPanel(rightCol, 'Negative', activeTasks.filter(t => t.type === 'negative'), 'panel-negative', 'negative');
     }
 
     // Special full-height daily panel for center
@@ -146,7 +146,7 @@ export class DashboardView extends ItemView {
 
         const header = panel.createDiv('lv999-panel-header');
         const titleWrap = header.createDiv('lv999-panel-title');
-        titleWrap.createEl('span', { cls: 'lv999-panel-icon', text: '☀️' });
+        //titleWrap.createEl('span', { cls: 'lv999-panel-icon', text: '☀️' });
         titleWrap.createEl('h3', { text: 'Daily Quests' });
         header.createSpan({ cls: 'lv999-task-count', text: `${tasks.length}` });
 
@@ -185,7 +185,7 @@ export class DashboardView extends ItemView {
         });
 
         if (tasks.length === 0) {
-            list.createDiv('lv999-empty-state').setText('No daily quests. Enjoy the peace — or add one below.');
+            list.createDiv('lv999-empty-state').setText('No daily quests.');
         }
 
         const quickAddRow = list.createDiv('lv999-quick-add lv999-daily-quick');

@@ -491,3 +491,704 @@
     transition: opacity 0.35s ease, transform 0.35s ease !important;
     pointer-events: none;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   LV999 Celestial Casino — Custom Styles
+   ═══════════════════════════════════════════════════════════ */
+
+.lv999-casino-container {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: radial-gradient(circle at top, var(--background-secondary) 0%, var(--background-primary) 100%);
+    font-family: var(--font-interface);
+    box-sizing: border-box;
+    gap: 16px;
+}
+
+/* Casino Header */
+.lv999-casino-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.lv999-casino-title-area {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.lv999-casino-title {
+    margin: 0;
+    font-size: 1.5em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+}
+
+.lv999-casino-subtitle {
+    margin: 0;
+    font-size: 0.78em;
+    color: var(--text-muted);
+}
+
+.lv999-casino-balances {
+    display: flex;
+    gap: 10px;
+}
+
+.lv999-c-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: var(--background-primary-alt);
+    font-weight: 700;
+    font-size: 0.88em;
+    border: 1px solid var(--background-modifier-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.15s ease;
+}
+
+.lv999-c-badge:hover {
+    transform: translateY(-1px);
+}
+
+.lv999-c-badge .lbl {
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+.lv999-c-badge.silver { border-color: rgba(158, 158, 158, 0.4); }
+.lv999-c-badge.silver .val { color: #d1d5db; text-shadow: 0 0 8px rgba(209, 213, 219, 0.3); }
+
+.lv999-c-badge.gold { border-color: rgba(255, 193, 7, 0.4); }
+.lv999-c-badge.gold .val { color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, 0.3); }
+
+.lv999-c-badge.diamond { border-color: rgba(0, 188, 212, 0.4); }
+.lv999-c-badge.diamond .val { color: #22d3ee; text-shadow: 0 0 8px rgba(34, 211, 238, 0.3); }
+
+/* Casino Navigation */
+.lv999-casino-nav {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 8px;
+    flex-shrink: 0;
+}
+
+.lv999-casino-tab-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 0.88em;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lv999-casino-tab-btn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.lv999-casino-tab-btn.active {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--interactive-accent) 40%, transparent);
+}
+
+/* Content Area */
+.lv999-casino-content {
+    flex: 1;
+    min-height: 0;
+}
+
+/* Games Grid */
+.lv999-games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    height: 100%;
+}
+
+.lv999-game-card {
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    gap: 12px;
+}
+
+.lv999-game-card:hover {
+    border-color: color-mix(in srgb, var(--interactive-accent) 30%, transparent);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+}
+
+.game-title {
+    margin: 0;
+    font-size: 1.25em;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-normal);
+    text-align: center;
+}
+
+.game-desc {
+    margin: 0;
+    font-size: 0.78em;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.4;
+}
+
+.game-payout-display {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px dashed var(--background-modifier-border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #ffd700;
+    text-align: center;
+    box-sizing: border-box;
+    min-height: 38px;
+}
+
+.lv999-game-action-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--interactive-accent) 0%, color-mix(in srgb, var(--interactive-accent) 80%, #000 20%) 100%);
+    color: var(--text-on-accent);
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.lv999-game-action-btn:hover:not(:disabled) {
+    filter: brightness(1.15);
+    transform: translateY(-1px);
+}
+
+.lv999-game-action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Slots Visuals */
+.slots-visual-area {
+    display: flex;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 2px solid var(--background-modifier-border);
+    border-radius: 10px;
+    padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.slots-visual-area::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.4) 100%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.slots-visual-area.spinning .slot-reel {
+    filter: blur(1.5px);
+}
+
+.slot-reel {
+    flex: 1;
+    height: 60px;
+    background: #000;
+    border: 2px solid #ffaa00;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1.15em;
+    color: #ffaa00;
+    text-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+    transition: filter 0.1s ease;
+}
+
+/* Wheel Visuals */
+.wheel-visual-container {
+    width: 130px;
+    height: 130px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    border: 4px solid var(--background-modifier-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+.wheel-inner {
+    width: 100px;
+    height: 100px;
+    background: #111;
+    border: 3px dashed #00bcd4;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.72em;
+    color: #00bcd4;
+    text-align: center;
+    padding: 6px;
+    line-height: 1.3;
+    text-transform: uppercase;
+    text-shadow: 0 0 8px rgba(0, 188, 212, 0.4);
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.9);
+}
+
+.wheel-inner.spinning {
+    animation: rotateWheel 0.2s linear infinite;
+}
+
+@keyframes rotateWheel {
+    100% { transform: rotate(360deg); }
+}
+
+/* Dice Visuals */
+.dice-bet-select-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 6px 10px;
+    box-sizing: border-box;
+}
+
+.bet-lbl {
+    font-size: 0.82em;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.dice-bet-type-dropdown, .dice-number-dropdown {
+    background: var(--background-primary-alt);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-normal);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.8em;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.dice-number-select-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    padding: 6px 10px;
+    box-sizing: border-box;
+    font-size: 0.82em;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.dice-visual-row {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    width: 100%;
+}
+
+.dice-visual-row.rolling .die-face {
+    animation: bounceDie 0.15s ease infinite alternate;
+}
+
+.dice-visual-row.rolling .die-face:nth-child(2) {
+    animation-delay: 0.05s;
+}
+
+.dice-visual-row.rolling .die-face:nth-child(3) {
+    animation-delay: 0.1s;
+}
+
+.die-face {
+    width: 44px;
+    height: 44px;
+    background: #222;
+    border: 2px solid #ec4899;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4em;
+    font-weight: 800;
+    color: #ec4899;
+    text-shadow: 0 0 10px rgba(236, 72, 153, 0.4);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+@keyframes bounceDie {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(-8px) rotate(15deg); }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   GACHA ALTAR TAB
+   ──────────────────────────────────────────────────────────────── */
+.lv999-gacha-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100%;
+}
+
+.lv999-gacha-altar-display {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.1);
+}
+
+.altar-heading {
+    margin: 0;
+    font-size: 1.6em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+}
+
+.altar-subheading {
+    margin: 0;
+    font-size: 0.85em;
+    color: var(--text-muted);
+    max-width: 460px;
+    line-height: 1.5;
+}
+
+.lv999-gacha-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.lv999-gacha-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 14px 28px;
+    font-weight: 800;
+    font-size: 1em;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+    color: #fff;
+}
+
+.lv999-gacha-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.lv999-gacha-btn.single {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.lv999-gacha-btn.ten {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.lv999-gacha-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.lv999-gacha-results-wrapper {
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: fadeIn 0.4s ease;
+}
+
+.results-title {
+    margin: 0;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+}
+
+.gacha-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+/* Animations */
+.gacha-animation-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    gap: 16px;
+}
+
+.portal-glow {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 4px solid transparent;
+    border-top-color: #8b5cf6;
+    border-bottom-color: #ec4899;
+    animation: rotatePortal 0.8s linear infinite;
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+}
+
+@keyframes rotatePortal {
+    100% { transform: rotate(360deg); }
+}
+
+.animation-text {
+    font-size: 0.9em;
+    font-weight: 700;
+    color: #a78bfa;
+    text-shadow: 0 0 8px rgba(167, 139, 250, 0.4);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ────────────────────────────────────────────────────────────────
+   INVENTORY & RARITY CARDS
+   ──────────────────────────────────────────────────────────────── */
+.lv999-vault-inventory {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+}
+
+.vault-title {
+    margin: 0;
+    font-size: 1.4em;
+    font-weight: 800;
+    color: var(--text-normal);
+}
+
+.vault-subtitle {
+    margin: 0;
+    font-size: 0.8em;
+    color: var(--text-muted);
+}
+
+.inventory-empty-state {
+    color: var(--text-faint);
+    font-style: italic;
+    font-size: 0.85em;
+    text-align: center;
+    padding: 60px 20px;
+    border: 1px dashed var(--background-modifier-border);
+    border-radius: 12px;
+}
+
+.inventory-summary {
+    font-size: 0.78em;
+    color: var(--text-muted);
+    font-weight: 600;
+    background: var(--background-primary-alt);
+    padding: 6px 12px;
+    border-radius: 6px;
+    width: fit-content;
+}
+
+.vault-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+/* Rarity-specific Cards styling */
+.gacha-result-card, .vault-item-card {
+    background: var(--background-secondary);
+    border-radius: 10px;
+    padding: 14px;
+    border: 1.5px solid transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+
+.vault-item-card:hover {
+    transform: translateY(-2px);
+}
+
+.card-badge-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.item-rarity-badge {
+    font-size: 0.6em;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 6px;
+    border-radius: 99px;
+    width: fit-content;
+}
+
+.item-count-badge {
+    font-size: 0.72em;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--background-primary-alt);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.item-name {
+    font-weight: 700;
+    font-size: 0.9em;
+    color: var(--text-normal);
+}
+
+.item-desc {
+    font-size: 0.72em;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+/* Rarity Theming (NO EMOJIS, pure typography and neon glowing styles) */
+/* Common - Gray */
+.rarity-common {
+    border-color: rgba(148, 163, 184, 0.35);
+    background: linear-gradient(180deg, rgba(148, 163, 184, 0.05) 0%, var(--background-secondary) 100%);
+}
+.rarity-common .item-rarity-badge {
+    background: #64748b;
+    color: #fff;
+}
+
+/* Uncommon - Green */
+.rarity-uncommon {
+    border-color: rgba(34, 197, 94, 0.35);
+    background: linear-gradient(180deg, rgba(34, 197, 94, 0.05) 0%, var(--background-secondary) 100%);
+}
+.rarity-uncommon .item-rarity-badge {
+    background: #22c55e;
+    color: #fff;
+}
+
+/* Rare - Blue */
+.rarity-rare {
+    border-color: rgba(59, 130, 246, 0.38);
+    background: linear-gradient(180deg, rgba(59, 130, 246, 0.06) 0%, var(--background-secondary) 100%);
+}
+.rarity-rare .item-rarity-badge {
+    background: #3b82f6;
+    color: #fff;
+}
+
+/* Epic - Purple */
+.rarity-epic {
+    border-color: rgba(168, 85, 247, 0.42);
+    background: linear-gradient(180deg, rgba(168, 85, 247, 0.08) 0%, var(--background-secondary) 100%);
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.08);
+}
+.rarity-epic .item-rarity-badge {
+    background: #a855f7;
+    color: #fff;
+}
+
+/* Legendary - Golden/Orange */
+.rarity-legendary {
+    border-color: rgba(245, 158, 11, 0.5);
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.1) 0%, var(--background-secondary) 100%);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.12);
+    animation: legendaryCardPulse 4s ease-in-out infinite alternate;
+}
+.rarity-legendary .item-rarity-badge {
+    background: #f59e0b;
+    color: #000;
+}
+
+@keyframes legendaryCardPulse {
+    0% { border-color: rgba(245, 158, 11, 0.4); }
+    100% { border-color: rgba(245, 158, 11, 0.7); box-shadow: 0 0 20px rgba(245, 158, 11, 0.22); }
+}
+
+/* Mythic - Pink/Cyan */
+.rarity-mythic {
+    border-color: rgba(236, 72, 153, 0.65);
+    background: linear-gradient(185deg, rgba(236, 72, 153, 0.12) 0%, var(--background-secondary) 100%);
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+    animation: mythicCardPulse 2s ease-in-out infinite alternate;
+}
+.rarity-mythic .item-rarity-badge {
+    background: linear-gradient(90deg, #ec4899 0%, #06b6d4 100%);
+    color: #fff;
+}
+
+@keyframes mythicCardPulse {
+    0% { border-color: rgba(236, 72, 153, 0.5); box-shadow: 0 0 15px rgba(236, 72, 153, 0.15); }
+    100% { border-color: rgba(6, 182, 212, 0.8); box-shadow: 0 0 25px rgba(6, 182, 212, 0.35); }
+}

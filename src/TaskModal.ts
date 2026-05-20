@@ -137,12 +137,12 @@ export class TaskModal extends Modal {
             t.setValue(String(this.taskData.rewardDiamond ?? 0));
             t.onChange(v => (this.taskData.rewardDiamond = parseFloat(v) || 0));
         });
-        new Setting(contentEl).setName('Gold 🪙').addText(t => {
+        new Setting(contentEl).setName('Gold ⭐️').addText(t => {
             t.inputEl.type = 'number';
             t.setValue(String(this.taskData.rewardGold ?? 0));
             t.onChange(v => (this.taskData.rewardGold = parseFloat(v) || 0));
         });
-        new Setting(contentEl).setName('Silver 🥈').addText(t => {
+        new Setting(contentEl).setName('Silver 🪙').addText(t => {
             t.inputEl.type = 'number';
             t.setValue(String(this.taskData.rewardSilver ?? 0));
             t.onChange(v => (this.taskData.rewardSilver = parseFloat(v) || 0));

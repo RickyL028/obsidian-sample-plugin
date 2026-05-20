@@ -5,6 +5,7 @@ export interface Lv999Settings {
     diamonds: number;
     goldCoins: number;
     silverCoins: number;
+    inventory: Record<string, number>;
 }
 
 export const DEFAULT_SETTINGS: Lv999Settings = {
@@ -13,7 +14,8 @@ export const DEFAULT_SETTINGS: Lv999Settings = {
     currentXp: 0,
     diamonds: 0,
     goldCoins: 0,
-    silverCoins: 0
+    silverCoins: 0,
+    inventory: {}
 };
 
 export interface TaskData {
