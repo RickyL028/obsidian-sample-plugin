@@ -1,8 +1,325 @@
-/*
+/* Container Variables */
+.lv999-dashboard {
+    padding: 30px;
+    height: 100%;
+    overflow-y: auto;
+    background-color: var(--background-primary);
+    font-family: var(--font-interface);
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* -----------------------------
+   Header & Profile Widget 
+----------------------------- */
+.lv999-header-panel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--background-secondary);
+    padding: 20px 30px;
+    border-radius: 16px;
+    margin-bottom: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border: 1px solid var(--background-modifier-border);
+    transition: transform 0.3s ease;
+}
 
-If your plugin does not need CSS, delete this file.
+.lv999-header-panel:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
 
-*/
+.lv999-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.lv999-avatar {
+    font-size: 3em;
+    background: var(--background-primary-alt);
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.lv999-level-info h2 { 
+    margin: 0 0 5px 0; 
+    color: var(--text-accent); 
+    font-size: 1.5em;
+}
+
+/* XP Bar Animation */
+.lv999-xp-bar-container {
+    width: 250px;
+    height: 12px;
+    background: var(--background-modifier-darken);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+    margin-bottom: 5px;
+}
+
+.lv999-xp-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #8bc34a, #4caf50);
+    background-size: 200% 200%;
+    border-radius: 10px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.lv999-xp-text { 
+    font-size: 0.85em; 
+    color: var(--text-muted); 
+    font-weight: 600;
+}
+
+/* Interactive Currency Badges */
+.lv999-currencies {
+    display: flex;
+    gap: 15px;
+    margin-right: 20px;
+}
+
+.lv999-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 15px;
+    border-radius: 20px;
+    background: var(--background-primary);
+    font-weight: 700;
+    font-size: 1.1em;
+    cursor: default;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.lv999-badge:hover {
+    transform: scale(1.08) translateY(-2px);
+}
+
+.lv999-badge.diamond { border: 1px solid rgba(0, 188, 212, 0.4); color: #00bcd4; }
+.lv999-badge.gold { border: 1px solid rgba(255, 193, 7, 0.4); color: #ffc107; }
+.lv999-badge.silver { border: 1px solid rgba(158, 158, 158, 0.4); color: #9e9e9e; }
+.lv999-badge span { color: var(--text-normal); }
+
+/* Main Action Button */
+.lv999-action-btn {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(var(--interactive-accent-rgb), 0.4);
+    transition: all 0.2s ease;
+}
+
+.lv999-action-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 15px rgba(var(--interactive-accent-rgb), 0.6);
+}
+
+/* -----------------------------
+   Dashboard Grid Layout 
+----------------------------- */
+.lv999-grid {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+}
+
+.lv999-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.lv999-col.center-col {
+    flex: 1.4; /* Center receives more focus */
+}
+
+/* -----------------------------
+   Task Panels (Enclosed Boxes)
+----------------------------- */
+.lv999-panel {
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.lv999-panel:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-color: var(--background-modifier-border-hover);
+}
+
+/* Theme panels slightly by type */
+.panel-negative { border-top: 4px solid #f44336; }
+.panel-strategic { border-top: 4px solid #9c27b0; }
+.panel-weekly { border-top: 4px solid #2196f3; }
+.panel-daily { border-top: 4px solid var(--interactive-accent); }
+
+.lv999-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    padding-bottom: 10px;
+}
+
+.lv999-panel-header h3 {
+    margin: 0;
+    font-size: 1.1em;
+    color: var(--text-normal);
+}
+
+.lv999-task-count {
+    background: var(--background-primary);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: var(--text-muted);
+}
+
+.lv999-empty-state {
+    color: var(--text-faint);
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+/* -----------------------------
+   Interactive Task Items
+----------------------------- */
+.lv999-task-item {
+    display: flex;
+    align-items: center;
+    background: var(--background-primary-alt);
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.lv999-task-item:hover {
+    transform: translateX(5px);
+    border-color: var(--background-modifier-border-hover);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Todoist-Style specialized center cards */
+.todoist-card {
+    background: var(--background-primary);
+    border-left: 3px solid var(--interactive-accent);
+}
+
+/* Checkbox Styling */
+.lv999-checkbox-wrapper {
+    margin-right: 15px;
+}
+
+.lv999-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--text-muted);
+    border-radius: 50% !important; /* Circular for Todoist style */
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.lv999-checkbox:hover {
+    border-color: var(--interactive-accent);
+    background: rgba(var(--interactive-accent-rgb), 0.1);
+}
+
+.lv999-checkbox:checked {
+    background: var(--interactive-accent);
+    border-color: var(--interactive-accent);
+}
+
+.lv999-checkbox:checked::after {
+    content: '✓';
+    color: var(--text-on-accent);
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Text and Labels */
+.lv999-task-text {
+    flex-grow: 1;
+}
+
+.lv999-task-name {
+    font-weight: 600;
+    font-size: 1.05em;
+    color: var(--text-normal);
+}
+
+.lv999-task-details {
+    font-size: 0.8em;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Icon Buttons */
+.lv999-task-actions {
+    display: flex;
+    gap: 5px;
+    opacity: 0; /* Hide by default */
+    transition: opacity 0.2s ease;
+}
+
+.lv999-task-item:hover .lv999-task-actions {
+    opacity: 1; /* Show on hover */
+}
+
+.lv999-icon-btn {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    cursor: pointer;
+    color: var(--text-faint);
+    padding: 6px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.lv999-icon-btn:hover {
+    background: var(--background-modifier-hover);
+    color: var(--text-normal);
+    transform: scale(1.1);
+}
+
+.lv999-icon-btn.delete:hover {
+    color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+/* Task Completion Animation */
+.lv999-completing {
+    transform: translateX(30px) scale(0.9) !important;
+    opacity: 0;
+    pointer-events: none;
+}

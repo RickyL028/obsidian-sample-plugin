@@ -1,36 +1,28 @@
-import {App, PluginSettingTab, Setting} from "obsidian";
-import MyPlugin from "./main";
+import { App, PluginSettingTab, Setting } from 'obsidian';
+import Lv999Plugin from './main';
 
-export interface MyPluginSettings {
-	mySetting: string;
-}
+export class Lv999SettingTab extends PluginSettingTab {
+    plugin: Lv999Plugin;
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
-}
+    constructor(app: App, plugin: Lv999Plugin) {
+        super(app, plugin);
+        this.plugin = plugin;
+    }
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+    display(): void {
+        const { containerEl } = this;
+        containerEl.empty();
+        containerEl.createEl('h2', { text: 'Lv999 Plugin Settings' });
 
-	constructor(app: App, plugin: MyPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
-
-	display(): void {
-		const {containerEl} = this;
-
-		containerEl.empty();
-
-		new Setting(containerEl)
-			.setName('Settings #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
+        new Setting(containerEl)
+            .setName('Designated Task Folder')
+            .setDesc('Folder where all Lv999 tasks will be stored as .md files.')
+            .addText(text => text
+                .setPlaceholder('Lv999_Tasks')
+                .setValue(this.plugin.settings.taskFolder)
+                .onChange(async (value) => {
+                    this.plugin.settings.taskFolder = value;
+                    await this.plugin.saveSettings();
+                }));
+    }
 }
