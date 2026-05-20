@@ -6,6 +6,9 @@ export interface Lv999Settings {
     goldCoins: number;
     silverCoins: number;
     inventory: Record<string, number>;
+    geminiApiKey: string;
+    todayStudySeconds: number;
+    lastStudyResetDate: string;
 }
 
 export const DEFAULT_SETTINGS: Lv999Settings = {
@@ -15,7 +18,10 @@ export const DEFAULT_SETTINGS: Lv999Settings = {
     diamonds: 0,
     goldCoins: 0,
     silverCoins: 0,
-    inventory: {}
+    inventory: {},
+    geminiApiKey: '',
+    todayStudySeconds: 0,
+    lastStudyResetDate: ''
 };
 
 export interface TaskData {

@@ -341,7 +341,7 @@ export class CasinoView extends ItemView {
                 const tempIndex = Math.floor(Math.random() * outcomes.length);
                 const outcome = outcomes[tempIndex];
                 if (outcome) {
-                    wheelInner.setText(outcome.name.split(' (')[0]);
+                    wheelInner.setText(outcome.name.split(' (')[0] || '');
                 }
 
                 ticks++;

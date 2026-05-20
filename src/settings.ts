@@ -24,5 +24,18 @@ export class Lv999SettingTab extends PluginSettingTab {
                     this.plugin.settings.taskFolder = value;
                     await this.plugin.saveSettings();
                 }));
+
+        new Setting(containerEl)
+            .setName('Gemini API Key')
+            .setDesc('Required for evaluating quest rewards with AI (using gemma-4-31b-it).')
+            .addText(text => {
+                text.inputEl.type = 'password';
+                text.setPlaceholder('AIzaSy...')
+                    .setValue(this.plugin.settings.geminiApiKey)
+                    .onChange(async (value) => {
+                        this.plugin.settings.geminiApiKey = value.trim();
+                        await this.plugin.saveSettings();
+                    });
+            });
     }
 }

@@ -1192,3 +1192,264 @@
     0% { border-color: rgba(236, 72, 153, 0.5); box-shadow: 0 0 15px rgba(236, 72, 153, 0.15); }
     100% { border-color: rgba(6, 182, 212, 0.8); box-shadow: 0 0 25px rgba(6, 182, 212, 0.35); }
 }
+
+/* ── Study Timer HUD Widget ────────────────────────── */
+.lv999-study-timer-hud {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--background-primary-alt);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.timer-play-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.8em;
+    padding: 0;
+    transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.timer-play-btn:hover {
+    transform: scale(1.08);
+    filter: brightness(1.12);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--interactive-accent) 60%, transparent);
+}
+
+.timer-play-btn.running {
+    background: #e53935; /* Pulsing red when active */
+    animation: timerPulse 2s infinite alternate;
+}
+
+@keyframes timerPulse {
+    0% { box-shadow: 0 0 2px rgba(229, 57, 53, 0.4); }
+    100% { box-shadow: 0 0 10px rgba(229, 57, 53, 0.85); }
+}
+
+.timer-display-group {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.1;
+}
+
+.timer-time {
+    font-family: var(--font-monospace);
+    font-size: 1em;
+    font-weight: 700;
+    color: var(--text-normal);
+    font-variant-numeric: tabular-nums;
+}
+
+.timer-label {
+    font-size: 0.6em;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 1px;
+}
+
+.timer-yield-progress-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--background-modifier-darken);
+}
+
+.timer-yield-progress {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #ff8c00);
+    width: 0%;
+    transition: width 1s linear;
+    box-shadow: 0 0 4px #ffd700;
+}
+
+/* ── Sub-Tabs Navigation ────────────────────────────── */
+.lv999-sub-tabs-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 4px;
+    flex-shrink: 0;
+}
+
+.lv999-sub-tabs {
+    display: flex;
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 9px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.lv999-sub-tabs .lv999-tab-btn {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: 0.82em;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.lv999-sub-tabs .lv999-tab-btn:hover {
+    color: var(--text-normal);
+    background: var(--background-primary-alt);
+}
+
+.lv999-sub-tabs .lv999-tab-btn.active {
+    background: var(--background-primary);
+    color: var(--interactive-accent);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Analytics View Layout ───────────────────────────── */
+.lv999-analytics-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: fadeIn 0.35s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.analytics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.analytics-title-wrap h3 {
+    margin: 0;
+    font-size: 1.15em;
+    font-weight: 800;
+    color: var(--text-normal);
+}
+
+.analytics-subtitle {
+    margin: 2px 0 0;
+    font-size: 0.72em;
+    color: var(--text-muted);
+}
+
+.metric-toggles {
+    display: flex;
+    gap: 6px;
+}
+
+.metric-btn {
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    color: var(--text-muted);
+    border-radius: 7px;
+    padding: 5px 12px;
+    font-size: 0.78em;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.metric-btn:hover {
+    color: var(--text-normal);
+    border-color: var(--background-modifier-border-hover);
+}
+
+.metric-btn.active {
+    background: var(--interactive-accent);
+    color: var(--text-on-accent);
+    border-color: var(--interactive-accent);
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--interactive-accent) 30%, transparent);
+}
+
+/* Graph Panel Styling */
+.graph-card {
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 12px;
+    padding: 16px 18px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.graph-wrapper {
+    width: 100%;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Stats Cards Grid */
+.analytics-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+}
+
+.analytics-card {
+    background: var(--background-secondary);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+    border-left: 4px solid var(--text-muted);
+}
+
+.analytics-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--background-modifier-border-hover);
+}
+
+/* Card metrics colors */
+.analytics-card.study { border-left-color: var(--interactive-accent); }
+.analytics-card.xp { border-left-color: #00bcd4; }
+.analytics-card.diamonds { border-left-color: #e91e63; }
+.analytics-card.coins { border-left-color: #ffc107; }
+
+.analytics-card.today-highlight {
+    background: var(--background-primary-alt);
+    border-color: color-mix(in srgb, var(--text-accent) 30%, var(--background-modifier-border));
+}
+
+.analytics-card .card-title {
+    font-size: 0.65em;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.analytics-card .card-value {
+    font-size: 1.25em;
+    font-weight: 800;
+    color: var(--text-normal);
+    margin: 6px 0 2px;
+}
+
+.analytics-card .card-desc {
+    font-size: 0.68em;
+    color: var(--text-faint);
+    line-height: 1.3;
+}
