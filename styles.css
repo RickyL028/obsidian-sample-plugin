@@ -1,257 +1,369 @@
-/* Container Variables */
+/* ═══════════════════════════════════════════════════════════
+   LV999 Dashboard — Modern Redesign
+   Layout: full-bleed, 3-col grid, daily panel dominant centre
+═══════════════════════════════════════════════════════════ */
+
+/* ── Root & Container ─────────────────────────────────── */
 .lv999-dashboard {
-    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px 16px;
     height: 100%;
     overflow-y: auto;
-    background-color: var(--background-primary);
+    overflow-x: hidden;
+    background: var(--background-primary);
     font-family: var(--font-interface);
+    box-sizing: border-box;
+    gap: 12px;
 }
 
-/* -----------------------------
-   Header & Profile Widget 
------------------------------ */
+/* ── Header ───────────────────────────────────────────── */
 .lv999-header-panel {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 16px;
     background: var(--background-secondary);
-    padding: 20px 30px;
-    border-radius: 16px;
-    margin-bottom: 30px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
     border: 1px solid var(--background-modifier-border);
-    transition: transform 0.3s ease;
-}
-
-.lv999-header-panel:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    border-radius: 12px;
+    padding: 12px 18px;
+    flex-shrink: 0;
 }
 
 .lv999-profile {
     display: flex;
     align-items: center;
-    gap: 15px;
-    flex: 1;
+    gap: 12px;
+    flex: 0 0 auto;
 }
 
 .lv999-avatar {
-    font-size: 3em;
+    font-size: 2em;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: var(--background-primary-alt);
-    padding: 10px;
-    border-radius: 50%;
-    box-shadow: inset 0 3px 6px rgba(0,0,0,0.1);
-}
-
-.lv999-level-info h2 { 
-    margin: 0 0 5px 0; 
-    color: var(--text-accent); 
-    font-size: 1.5em;
-}
-
-/* XP Bar Animation */
-.lv999-xp-bar-container {
-    width: 250px;
-    height: 12px;
-    background: var(--background-modifier-darken);
     border-radius: 10px;
+    border: 1px solid var(--background-modifier-border);
+    flex-shrink: 0;
+}
+
+.lv999-level-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 180px;
+}
+
+.lv999-level-label {
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--text-accent);
+    text-transform: uppercase;
+}
+
+.lv999-xp-bar-container {
+    position: relative;
+    width: 180px;
+    height: 6px;
+    background: var(--background-modifier-darken);
+    border-radius: 99px;
     overflow: hidden;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
-    margin-bottom: 5px;
 }
 
 .lv999-xp-bar {
+    position: absolute;
+    inset: 0 auto 0 0;
     height: 100%;
-    background: linear-gradient(90deg, #4caf50, #8bc34a, #4caf50);
-    background-size: 200% 200%;
-    border-radius: 10px;
-    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: gradientShift 3s ease infinite;
+    background: linear-gradient(90deg, var(--interactive-accent), color-mix(in srgb, var(--interactive-accent) 70%, #fff 30%));
+    border-radius: 99px;
+    transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+.lv999-xp-bar-glow {
+    position: absolute;
+    inset: 0 auto 0 0;
+    height: 100%;
+    background: var(--interactive-accent);
+    border-radius: 99px;
+    opacity: 0.35;
+    filter: blur(4px);
+    transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.lv999-xp-text { 
-    font-size: 0.85em; 
-    color: var(--text-muted); 
+.lv999-xp-text {
+    font-size: 0.72em;
+    color: var(--text-muted);
     font-weight: 600;
+    font-variant-numeric: tabular-nums;
 }
 
-/* Interactive Currency Badges */
+.lv999-xp-sep { opacity: 0.45; margin: 0 2px; }
+
+/* Header center — stat pills */
+.lv999-header-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.lv999-stat-pills {
+    display: flex;
+    gap: 8px;
+}
+
+.lv999-stat-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 5px 16px;
+    border-radius: 8px;
+    background: var(--background-primary-alt);
+    border: 1px solid var(--background-modifier-border);
+    min-width: 54px;
+}
+
+.lv999-stat-pill .pill-val {
+    font-size: 1.15em;
+    font-weight: 700;
+    color: var(--text-normal);
+    font-variant-numeric: tabular-nums;
+}
+
+.lv999-stat-pill .pill-lbl {
+    font-size: 0.63em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+/* Header right */
+.lv999-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 0 0 auto;
+}
+
 .lv999-currencies {
     display: flex;
-    gap: 15px;
-    margin-right: 20px;
+    gap: 6px;
 }
 
 .lv999-badge {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 15px;
-    border-radius: 20px;
-    background: var(--background-primary);
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 7px;
+    background: var(--background-primary-alt);
     font-weight: 700;
-    font-size: 1.1em;
-    cursor: default;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    font-size: 0.88em;
+    border: 1px solid var(--background-modifier-border);
+    transition: transform 0.15s ease;
+    white-space: nowrap;
 }
 
-.lv999-badge:hover {
-    transform: scale(1.08) translateY(-2px);
-}
+.lv999-badge:hover { transform: translateY(-1px); }
+.lv999-badge.diamond { border-color: rgba(0,188,212,0.3); }
+.lv999-badge.diamond span { color: #00bcd4; }
+.lv999-badge.gold { border-color: rgba(255,193,7,0.3); }
+.lv999-badge.gold span { color: #ffc107; }
+.lv999-badge.silver { border-color: rgba(158,158,158,0.3); }
+.lv999-badge.silver span { color: #9e9e9e; }
 
-.lv999-badge.diamond { border: 1px solid rgba(0, 188, 212, 0.4); color: #00bcd4; }
-.lv999-badge.gold { border: 1px solid rgba(255, 193, 7, 0.4); color: #ffc107; }
-.lv999-badge.silver { border: 1px solid rgba(158, 158, 158, 0.4); color: #9e9e9e; }
-.lv999-badge span { color: var(--text-normal); }
-
-/* Main Action Button */
 .lv999-action-btn {
     background: var(--interactive-accent);
     color: var(--text-on-accent);
     border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 0.82em;
+    font-weight: 700;
+    letter-spacing: 0.03em;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(var(--interactive-accent-rgb), 0.4);
-    transition: all 0.2s ease;
+    transition: filter 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
 }
 
 .lv999-action-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 15px rgba(var(--interactive-accent-rgb), 0.6);
+    filter: brightness(1.12);
+    transform: translateY(-1px);
 }
 
-/* -----------------------------
-   Dashboard Grid Layout 
------------------------------ */
+/* ── Grid Layout ──────────────────────────────────────── */
 .lv999-grid {
-    display: flex;
-    gap: 25px;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr 1.75fr 1fr;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
 }
 
 .lv999-col {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+}
+
+/* Left and right cols: panels share available height equally */
+.lv999-col-left .lv999-panel,
+.lv999-col-right .lv999-panel {
+    flex: 1;
+    min-height: 0;
+}
+
+/* Center col: daily panel fills everything */
+.lv999-col-center {
+    height: 100%;
+}
+
+.lv999-daily-panel {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    height: 100%;
+    border-top: 3px solid var(--interactive-accent) !important;
+    /* Subtle glow on daily panel */
+    box-shadow: 0 0 0 1px var(--background-modifier-border),
+                0 0 24px -8px color-mix(in srgb, var(--interactive-accent) 30%, transparent);
 }
 
-.lv999-col.center-col {
-    flex: 1.4; /* Center receives more focus */
-}
-
-/* -----------------------------
-   Task Panels (Enclosed Boxes)
------------------------------ */
+/* ── Panels ───────────────────────────────────────────── */
 .lv999-panel {
     background: var(--background-secondary);
     border: 1px solid var(--background-modifier-border);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
-.lv999-panel:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    border-color: var(--background-modifier-border-hover);
-}
-
-/* Theme panels slightly by type */
-.panel-negative { border-top: 4px solid #f44336; }
-.panel-strategic { border-top: 4px solid #9c27b0; }
-.panel-weekly { border-top: 4px solid #2196f3; }
-.panel-daily { border-top: 4px solid var(--interactive-accent); }
+/* Accent top border per type */
+.panel-general   { border-top: 3px solid color-mix(in srgb, var(--text-muted) 60%, transparent); }
+.panel-weekly    { border-top: 3px solid #2196f3; }
+.panel-strategic { border-top: 3px solid #9c27b0; }
+.panel-negative  { border-top: 3px solid #f44336; }
+.panel-daily     { border-top: 3px solid var(--interactive-accent); }
 
 .lv999-panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    padding: 10px 14px 8px;
     border-bottom: 1px solid var(--background-modifier-border);
-    padding-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.lv999-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lv999-panel-icon {
+    font-size: 1em;
 }
 
 .lv999-panel-header h3 {
     margin: 0;
-    font-size: 1.1em;
+    font-size: 0.82em;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* Daily panel header — larger title */
+.lv999-daily-panel .lv999-panel-header h3 {
+    font-size: 0.9em;
     color: var(--text-normal);
 }
 
 .lv999-task-count {
-    background: var(--background-primary);
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    font-weight: bold;
+    font-size: 0.72em;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: var(--background-primary-alt);
     color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
 }
 
-.lv999-empty-state {
-    color: var(--text-faint);
-    font-style: italic;
-    text-align: center;
-    padding: 20px;
+/* Task list scrolls within panel */
+.lv999-task-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
-/* -----------------------------
-   Interactive Task Items
------------------------------ */
+/* Thin scrollbar */
+.lv999-task-list::-webkit-scrollbar { width: 3px; }
+.lv999-task-list::-webkit-scrollbar-track { background: transparent; }
+.lv999-task-list::-webkit-scrollbar-thumb {
+    background: var(--background-modifier-border);
+    border-radius: 99px;
+}
+
+/* ── Task Items ───────────────────────────────────────── */
 .lv999-task-item {
     display: flex;
     align-items: center;
-    background: var(--background-primary-alt);
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 7px;
     border: 1px solid transparent;
-    transition: all 0.2s ease;
+    transition: background 0.15s ease, border-color 0.15s ease;
+    cursor: default;
 }
 
 .lv999-task-item:hover {
-    transform: translateX(5px);
-    border-color: var(--background-modifier-border-hover);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    background: var(--background-primary-alt);
+    border-color: var(--background-modifier-border);
 }
 
-/* Todoist-Style specialized center cards */
-.todoist-card {
-    background: var(--background-primary);
-    border-left: 3px solid var(--interactive-accent);
+/* Daily items — slightly more prominent */
+.lv999-daily-item {
+    padding: 9px 12px;
 }
 
-/* Checkbox Styling */
-.lv999-checkbox-wrapper {
-    margin-right: 15px;
+.lv999-daily-item:hover {
+    border-color: color-mix(in srgb, var(--interactive-accent) 40%, transparent);
 }
+
+/* Checkbox */
+.lv999-checkbox-wrapper { flex-shrink: 0; }
 
 .lv999-checkbox {
     appearance: none;
     -webkit-appearance: none;
-    width: 22px;
-    height: 22px;
-    border: 2px solid var(--text-muted);
-    border-radius: 50% !important; /* Circular for Todoist style */
+    width: 18px;
+    height: 18px;
+    border: 2px solid var(--background-modifier-border-hover);
+    border-radius: 50%;
     cursor: pointer;
     outline: none;
-    transition: all 0.2s ease;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    transition: border-color 0.15s, background 0.15s;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.lv999-daily-item .lv999-checkbox {
+    width: 20px;
+    height: 20px;
 }
 
 .lv999-checkbox:hover {
     border-color: var(--interactive-accent);
-    background: rgba(var(--interactive-accent-rgb), 0.1);
+    background: color-mix(in srgb, var(--interactive-accent) 12%, transparent);
 }
 
 .lv999-checkbox:checked {
@@ -260,40 +372,50 @@
 }
 
 .lv999-checkbox:checked::after {
-    content: '✓';
-    color: var(--text-on-accent);
-    font-size: 14px;
-    font-weight: bold;
+    content: '';
+    width: 5px;
+    height: 9px;
+    border: 2px solid var(--text-on-accent);
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg) translate(-1px, -1px);
 }
 
-/* Text and Labels */
-.lv999-task-text {
-    flex-grow: 1;
-}
+/* Task text */
+.lv999-task-text { flex: 1; min-width: 0; }
 
 .lv999-task-name {
     font-weight: 600;
-    font-size: 1.05em;
+    font-size: 0.88em;
     color: var(--text-normal);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lv999-daily-item .lv999-task-name {
+    font-size: 0.95em;
 }
 
 .lv999-task-details {
-    font-size: 0.8em;
-    color: var(--text-muted);
-    margin-top: 4px;
+    font-size: 0.72em;
+    color: var(--text-faint);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Icon Buttons */
+/* Task actions — fade in on hover */
 .lv999-task-actions {
     display: flex;
-    gap: 5px;
-    opacity: 0; /* Hide by default */
-    transition: opacity 0.2s ease;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    flex-shrink: 0;
 }
 
-.lv999-task-item:hover .lv999-task-actions {
-    opacity: 1; /* Show on hover */
-}
+.lv999-task-item:hover .lv999-task-actions { opacity: 1; }
 
 .lv999-icon-btn {
     background: transparent;
@@ -301,63 +423,71 @@
     box-shadow: none;
     cursor: pointer;
     color: var(--text-faint);
-    padding: 6px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    line-height: 1;
+    transition: background 0.15s, color 0.15s;
 }
 
 .lv999-icon-btn:hover {
     background: var(--background-modifier-hover);
     color: var(--text-normal);
-    transform: scale(1.1);
 }
 
 .lv999-icon-btn.delete:hover {
     color: #f44336;
-    background: rgba(244, 67, 54, 0.1);
+    background: rgba(244,67,54,0.1);
 }
 
-/* Task Completion Animation */
-.lv999-completing {
-    transform: translateX(30px) scale(0.9) !important;
-    opacity: 0;
-    pointer-events: none;
-}
-/* Quick Add Row inside Panels */
+/* ── Quick Add ────────────────────────────────────────── */
 .lv999-quick-add {
     display: flex;
     align-items: center;
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin-top: 5px;
-    color: var(--text-muted);
+    gap: 7px;
+    padding: 6px 10px;
+    border-radius: 7px;
+    color: var(--text-faint);
     cursor: pointer;
-    transition: all 0.2s ease;
+    font-size: 0.8em;
+    font-weight: 600;
+    transition: color 0.15s, background 0.15s;
+    margin-top: 2px;
     border: 1px dashed transparent;
 }
 
-.lv999-quick-add span {
-    font-size: 0.9em;
-    font-weight: 600;
-}
-
 .lv999-quick-add:hover {
-    background: var(--background-modifier-hover);
     color: var(--interactive-accent);
-    border-color: var(--interactive-accent);
+    background: color-mix(in srgb, var(--interactive-accent) 6%, transparent);
+    border-color: color-mix(in srgb, var(--interactive-accent) 35%, transparent);
 }
 
-.todoist-card.lv999-quick-add {
-    border: none;
-    border-bottom: 1px dashed transparent;
-    border-radius: 0;
-    padding-left: 5px;
+.lv999-plus-icon {
+    font-size: 1.1em;
+    line-height: 1;
+    font-weight: 300;
+    opacity: 0.7;
 }
 
-.todoist-card.lv999-quick-add:hover {
-    border-bottom-color: var(--interactive-accent);
-    background: transparent;
+.lv999-daily-quick {
+    padding: 8px 12px;
+    font-size: 0.85em;
 }
 
-/* General Inbox Panel Styling */
-.panel-general { border-top: 4px solid var(--text-muted); }
+/* ── Empty State ──────────────────────────────────────── */
+.lv999-empty-state {
+    color: var(--text-faint);
+    font-style: italic;
+    font-size: 0.8em;
+    text-align: center;
+    padding: 24px 12px;
+    opacity: 0.7;
+}
+
+/* ── Completion Animation ─────────────────────────────── */
+.lv999-completing {
+    opacity: 0 !important;
+    transform: scale(0.92) translateX(12px) !important;
+    transition: opacity 0.35s ease, transform 0.35s ease !important;
+    pointer-events: none;
+}
