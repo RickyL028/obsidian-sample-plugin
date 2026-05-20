@@ -33,17 +33,14 @@ export default class Lv999Plugin extends Plugin {
             (leaf) => new CasinoView(leaf, this)
         );
 
-        // Adds ribbon icon on the left to open Dashboard
         this.addRibbonIcon('swords', 'Lv999 Dashboard', () => {
             this.activateView();
         });
 
-        // Adds ribbon icon on the left to open Casino
         this.addRibbonIcon('dice', 'Lv999 Celestial Casino', () => {
             this.activateCasinoView();
         });
 
-        // Optional Command Palette entries
         this.addCommand({
             id: 'open-lv999-dashboard',
             name: 'Open Lv999 Dashboard',
@@ -63,13 +60,34 @@ export default class Lv999Plugin extends Plugin {
         if (this.studyTimerIntervalId) {
             window.clearInterval(this.studyTimerIntervalId);
         }
-        // Force save study progress on exit
         if (this.settings.todayStudySeconds > 0) {
             const todayStr = DailyLogger.getTodayStr();
             await this.dailyLogger.updateLog(todayStr, {
                 studySeconds: this.settings.todayStudySeconds
             });
         }
+    }
+
+    /**
+     * Centralized XP processing.
+     * Calculates diamond count, applies 10% extra XP per diamond,
+     * updates levels, and returns the final boosted XP earned.
+     */
+    addXp(baseAmount: number): number {
+        // Fallbacks included in case 'diamonds' is stored under 'diamond'
+        const diamondCount = this.settings.diamonds ?? this.settings.diamonds ?? 0;
+        const multiplier = 1 + (diamondCount * 0.10);
+        
+        const boostedAmount = baseAmount * multiplier;
+        
+        this.settings.currentXp += boostedAmount;
+        let reqXp = 8 + (0.037 * this.settings.level);
+        while (this.settings.currentXp >= reqXp && this.settings.level < 999) {
+            this.settings.currentXp -= reqXp;
+            this.settings.level++;
+            reqXp = 8 + (0.037 * this.settings.level);
+        }
+        return boostedAmount;
     }
 
     startTimerTicker() {
@@ -81,21 +99,15 @@ export default class Lv999Plugin extends Plugin {
                 
                 // Yield 1 XP every 5 minutes (300 seconds)
                 if (this.settings.todayStudySeconds > 0 && this.settings.todayStudySeconds % 300 === 0) {
-                    this.settings.currentXp += 1;
-                    let reqXp = 8 + (0.037 * this.settings.level);
-                    while (this.settings.currentXp >= reqXp && this.settings.level < 999) {
-                        this.settings.currentXp -= reqXp;
-                        this.settings.level++;
-                        reqXp = 8 + (0.037 * this.settings.level);
-                    }
-                    new Notice("📚 Focus Power! Gained 1 XP!");
+                    const finalXpEarned = this.addXp(1);
+                    new Notice(`📚 Focus Power! Gained ${finalXpEarned.toFixed(1)} XP!`);
                     
-                    // Force a log update with the XP
+                    // Force a log update with the boosted XP
                     const todayStr = DailyLogger.getTodayStr();
                     const todayLog = await this.dailyLogger.getLog(todayStr);
                     await this.dailyLogger.updateLog(todayStr, {
                         studySeconds: this.settings.todayStudySeconds,
-                        xpEarned: todayLog.xpEarned + 1
+                        xpEarned: todayLog.xpEarned + finalXpEarned
                     });
                 } else if (this.settings.todayStudySeconds % 10 === 0) {
                     // Batch write log to disk every 10 seconds of study for performance
@@ -119,7 +131,6 @@ export default class Lv999Plugin extends Plugin {
     async toggleStudyTimer() {
         this.isStudyTimerRunning = !this.isStudyTimerRunning;
         if (!this.isStudyTimerRunning) {
-            // Paused: force log save immediately
             const todayStr = DailyLogger.getTodayStr();
             await this.dailyLogger.updateLog(todayStr, {
                 studySeconds: this.settings.todayStudySeconds
@@ -133,13 +144,11 @@ export default class Lv999Plugin extends Plugin {
     async checkMidnightReset() {
         const todayStr = DailyLogger.getTodayStr();
         if (this.settings.lastStudyResetDate !== todayStr) {
-            // Reset timer count
             this.settings.todayStudySeconds = 0;
             this.settings.lastStudyResetDate = todayStr;
-            this.studySessionSeconds = 0; // Reset session as well
+            this.studySessionSeconds = 0;
             await this.saveSettings();
             
-            // Create or initialize the daily log file for today
             await this.dailyLogger.updateLog(todayStr, {
                 studySeconds: 0
             });
@@ -158,7 +167,6 @@ export default class Lv999Plugin extends Plugin {
         if (leaves.length > 0 && leaves[0]) {
             leaf = leaves[0];
         } else {
-            // true flag ensures it opens in a new tab/pane!
             leaf = workspace.getLeaf(true); 
             await leaf.setViewState({ type: VIEW_TYPE_DASHBOARD, active: true });
         }

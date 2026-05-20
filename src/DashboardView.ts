@@ -7,6 +7,7 @@ import { DailyLogger, DailyLogData } from './DailyLogger';
 
 export const VIEW_TYPE_DASHBOARD = 'lv999-dashboard';
 
+
 export class DashboardView extends ItemView {
     plugin: Lv999Plugin;
     taskManager: TaskManager;
@@ -56,10 +57,17 @@ export class DashboardView extends ItemView {
 
     async gainRewards(task: TaskData) {
         let { settings } = this.plugin;
+        
+        // 1. Add rewards to currency settings first, so new diamonds count toward the XP boost
         settings.diamonds += task.rewardDiamond;
         settings.goldCoins += task.rewardGold;
         settings.silverCoins += task.rewardSilver;
-        settings.currentXp += task.rewardXp;
+        
+        // 2. Calculate boosted XP (+10% for every diamond currently held)
+        const xpMultiplier = 1 + (settings.diamonds * 0.10);
+        const boostedXp = task.rewardXp * xpMultiplier;
+
+        settings.currentXp += boostedXp;
         let requiredXp = 8 + (0.037 * settings.level);
         while (settings.currentXp >= requiredXp && settings.level < 999) {
             settings.currentXp -= requiredXp;
@@ -72,13 +80,13 @@ export class DashboardView extends ItemView {
         const todayStr = DailyLogger.getTodayStr();
         const currentLog = await this.plugin.dailyLogger.getLog(todayStr);
         await this.plugin.dailyLogger.updateLog(todayStr, {
-            xpEarned: currentLog.xpEarned + task.rewardXp,
+            xpEarned: currentLog.xpEarned + boostedXp,
             diamondsEarned: currentLog.diamondsEarned + task.rewardDiamond,
             goldEarned: currentLog.goldEarned + task.rewardGold,
             silverEarned: currentLog.silverEarned + task.rewardSilver
         });
 
-        new Notice(`Quest Complete! Gained ${task.rewardXp} XP!`);
+        new Notice(`Quest Complete! Gained ${boostedXp.toFixed(1)} XP! (x${xpMultiplier.toFixed(1)} Diamond Boost)`);
         this.requestRender();
     }
 
@@ -118,6 +126,7 @@ export class DashboardView extends ItemView {
             }
         }
     }
+    
 
     async renderDashboard() {
         const container = this.contentEl;
