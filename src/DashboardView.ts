@@ -205,8 +205,8 @@ export class DashboardView extends ItemView {
         const tabNav = container.createDiv('lv999-sub-tabs-container');
         tabNav.innerHTML = `
             <div class="lv999-sub-tabs">
-                <button class="lv999-tab-btn ${this.activeTab === 'quests' ? 'active' : ''}" id="lv999-tab-quests">⚔️ Active Quests</button>
-                <button class="lv999-tab-btn ${this.activeTab === 'analytics' ? 'active' : ''}" id="lv999-tab-analytics">📊 History & Analytics</button>
+                <button class="lv999-tab-btn ${this.activeTab === 'quests' ? 'active' : ''}" id="lv999-tab-quests">Tasks</button>
+                <button class="lv999-tab-btn ${this.activeTab === 'analytics' ? 'active' : ''}" id="lv999-tab-analytics">Logs</button>
             </div>
         `;
 
@@ -256,7 +256,7 @@ export class DashboardView extends ItemView {
 
         const header = panel.createDiv('lv999-panel-header');
         const titleWrap = header.createDiv('lv999-panel-title');
-        titleWrap.createEl('h3', { text: 'Daily Quests' });
+        titleWrap.createEl('h3', { text: 'Today' });
         header.createSpan({ cls: 'lv999-task-count', text: `${tasks.length}` });
 
         const list = panel.createDiv('lv999-task-list');
@@ -486,10 +486,10 @@ export class DashboardView extends ItemView {
 
                 <!-- Row 1: Metric toggles -->
                 <div class="metric-toggles">
-                    <button class="metric-btn ${this.selectedMetric === 'study' ? 'active' : ''}" data-metric="study">📚 Study Time</button>
-                    <button class="metric-btn ${this.selectedMetric === 'xp' ? 'active' : ''}" data-metric="xp">⚔️ XP Gained</button>
-                    <button class="metric-btn ${this.selectedMetric === 'diamonds' ? 'active' : ''}" data-metric="diamonds">💎 Diamonds</button>
-                    <button class="metric-btn ${this.selectedMetric === 'coins' ? 'active' : ''}" data-metric="coins">🪙 Coins</button>
+                    <button class="metric-btn ${this.selectedMetric === 'study' ? 'active' : ''}" data-metric="study">Study Time</button>
+                    <button class="metric-btn ${this.selectedMetric === 'xp' ? 'active' : ''}" data-metric="xp">XP</button>
+                    <button class="metric-btn ${this.selectedMetric === 'diamonds' ? 'active' : ''}" data-metric="diamonds">Diamonds</button>
+                    <button class="metric-btn ${this.selectedMetric === 'coins' ? 'active' : ''}" data-metric="coins">Coins</button>
                 </div>
 
                 <!-- Row 2: Range toggles -->
