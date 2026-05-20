@@ -10,7 +10,6 @@ export class DashboardView extends ItemView {
     plugin: Lv999Plugin;
     taskManager: TaskManager;
 
-    // Debounce ensures we don't flicker the UI if multiple files update at the exact same millisecond
     requestRender = debounce(this.renderDashboard.bind(this), 200);
 
     constructor(leaf: WorkspaceLeaf, plugin: Lv999Plugin) {
@@ -32,19 +31,14 @@ export class DashboardView extends ItemView {
     }
 
     async onOpen() {
-        // 1. Listen for modifications to existing tasks (Completion, Edits)
         this.registerEvent(this.app.metadataCache.on('changed', (file) => this.onTaskFileChanged(file)));
-        
-        // 2. Listen for newly created tasks or deleted tasks
         this.registerEvent(this.app.vault.on('create', (file) => this.onTaskFileChanged(file)));
         this.registerEvent(this.app.vault.on('delete', (file) => this.onTaskFileChanged(file)));
         this.registerEvent(this.app.vault.on('rename', (file) => this.onTaskFileChanged(file)));
 
-        // Initial Render
         this.renderDashboard();
     }
 
-    // Trigger a refresh only if the changed file is inside our designated task folder
     onTaskFileChanged(file: TAbstractFile) {
         if (file && file.path.startsWith(this.plugin.settings.taskFolder + '/')) {
             this.requestRender();
@@ -57,7 +51,6 @@ export class DashboardView extends ItemView {
         settings.goldCoins += task.rewardGold;
         settings.silverCoins += task.rewardSilver;
         
-        // XP Formula
         settings.currentXp += task.rewardXp;
         let requiredXp = 8 + (0.037 * settings.level);
         
@@ -68,8 +61,6 @@ export class DashboardView extends ItemView {
         }
         
         await this.plugin.saveSettings();
-        
-        // This mutates the file. The metadataCache 'changed' event will fire automatically and refresh the view!
         await this.taskManager.completeTask(task);
     }
 
@@ -81,7 +72,6 @@ export class DashboardView extends ItemView {
         const tasks = await this.taskManager.getTasks();
         const activeTasks = tasks.filter(t => !t.completed);
 
-        // Header / Profile Panel
         const header = container.createDiv('lv999-header-panel');
         const reqXp = 8 + (0.037 * this.plugin.settings.level);
         const xpPercent = Math.min(100, (this.plugin.settings.currentXp / reqXp) * 100);
@@ -102,34 +92,33 @@ export class DashboardView extends ItemView {
                 <div class="lv999-badge gold" title="Gold Coins">🪙 <span>${this.plugin.settings.goldCoins}</span></div>
                 <div class="lv999-badge silver" title="Silver Coins">🥈 <span>${this.plugin.settings.silverCoins}</span></div>
             </div>
-            <button id="lv999-add-task-btn" class="lv999-action-btn">➕ New Quest</button>
+            <button id="lv999-add-task-btn" class="lv999-action-btn">➕ Quick Add</button>
         `;
 
         header.querySelector('#lv999-add-task-btn')?.addEventListener('click', () => {
-            new TaskModal(this.app, null, async (data) => {
+            new TaskModal(this.app, null, 'general', async (data) => {
                 await this.taskManager.createTask(data);
-                // No need to manually render, the vault 'create' event handles it
             }).open();
         });
 
-        // 3 Column Grid
         const grid = container.createDiv('lv999-grid');
 
-        // Left Col (Strategic & Weekly Boxes)
+        // Left Col
         const leftCol = grid.createDiv('lv999-col');
-        this.renderTaskPanel(leftCol, '🎯 Strategic Goals', activeTasks.filter(t => t.type === 'strategic'), 'panel-strategic');
-        this.renderTaskPanel(leftCol, '📅 Weekly Tasks', activeTasks.filter(t => t.type === 'weekly'), 'panel-weekly');
+        this.renderTaskPanel(leftCol, '🎯 Strategic Goals', activeTasks.filter(t => t.type === 'strategic'), 'panel-strategic', 'strategic');
+        this.renderTaskPanel(leftCol, '📅 Weekly Tasks', activeTasks.filter(t => t.type === 'weekly'), 'panel-weekly', 'weekly');
 
-        // Center Col (Todoist Style Main Focus)
+        // Center Col (General and Daily)
         const centerCol = grid.createDiv('lv999-col center-col');
-        this.renderTaskPanel(centerCol, '☀️ Daily Quests (Todoist)', activeTasks.filter(t => t.type === 'daily'), 'panel-daily', true);
+        this.renderTaskPanel(centerCol, '📥 General (Inbox)', activeTasks.filter(t => t.type === 'general' || !t.type), 'panel-general', 'general', true);
+        this.renderTaskPanel(centerCol, '☀️ Daily Quests (Todoist)', activeTasks.filter(t => t.type === 'daily'), 'panel-daily', 'daily', true);
 
-        // Right Col (Negative)
+        // Right Col
         const rightCol = grid.createDiv('lv999-col');
-        this.renderTaskPanel(rightCol, '🔥 Forbidden Actions', activeTasks.filter(t => t.type === 'negative'), 'panel-negative');
+        this.renderTaskPanel(rightCol, '🔥 Forbidden Actions', activeTasks.filter(t => t.type === 'negative'), 'panel-negative', 'negative');
     }
 
-    renderTaskPanel(parent: HTMLElement, title: string, tasks: TaskData[], customClass: string, isCenter: boolean = false) {
+    renderTaskPanel(parent: HTMLElement, title: string, tasks: TaskData[], customClass: string, categoryType: string, isCenter: boolean = false) {
         const panel = parent.createDiv(`lv999-panel ${customClass}`);
         
         const header = panel.createDiv('lv999-panel-header');
@@ -137,10 +126,6 @@ export class DashboardView extends ItemView {
         header.createSpan({ cls: 'lv999-task-count', text: `${tasks.length}` });
 
         const list = panel.createDiv('lv999-task-list');
-        if(tasks.length === 0) {
-            list.createDiv('lv999-empty-state').setText('No active quests.');
-            return;
-        }
 
         tasks.forEach(task => {
             const item = list.createDiv(`lv999-task-item ${isCenter ? 'todoist-card' : ''}`);
@@ -149,23 +134,24 @@ export class DashboardView extends ItemView {
             const checkbox = checkboxWrapper.createEl('input', { type: 'checkbox', cls: 'lv999-checkbox' });
             
             checkbox.addEventListener('change', async () => {
-                item.addClass('lv999-completing'); // Triggers slide-out animation locally
-                setTimeout(() => this.gainRewards(task), 400); // Process reward and update file
+                item.addClass('lv999-completing');
+                setTimeout(() => this.gainRewards(task), 400);
             });
 
             const textBlock = item.createDiv('lv999-task-text');
             textBlock.createDiv('lv999-task-name').setText(task.name);
             
-            const detailStr = `📅 ${task.dueDate} | ⚡ ${task.rewardXp} XP | 🪙 ${task.rewardGold}G`;
+            // Format details conditionally based on whether a due date exists
+            const dateStr = task.dueDate ? `📅 ${task.dueDate} | ` : '';
+            const detailStr = !task.rewardDiamond ? `${dateStr} ${task.rewardXp} XP | ${task.rewardGold} G ${task.rewardSilver} S` : `${dateStr} ${task.rewardXp} XP | ${task.rewardDiamond} 💎`;
             textBlock.createDiv('lv999-task-details').setText(detailStr);
 
             const actions = item.createDiv('lv999-task-actions');
             
             const editBtn = actions.createEl('button', { cls: 'lv999-icon-btn', text: '✎' });
             editBtn.addEventListener('click', () => {
-                new TaskModal(this.app, task, async (data) => {
+                new TaskModal(this.app, task, categoryType, async (data) => {
                     await this.taskManager.updateTask(task.file, data);
-                    // The cache listener will auto-update the UI when the file resolves
                 }).open();
             });
 
@@ -174,9 +160,17 @@ export class DashboardView extends ItemView {
                 item.addClass('lv999-completing');
                 setTimeout(async () => {
                     await this.taskManager.deleteTask(task.file);
-                    // The vault delete event handles UI refresh
                 }, 400);
             });
+        });
+
+        // Interactive "Quick Add" row added to every box
+        const quickAddRow = list.createDiv(`lv999-quick-add ${isCenter ? 'todoist-card' : ''}`);
+        quickAddRow.innerHTML = `<span>➕ Add Quest...</span>`;
+        quickAddRow.addEventListener('click', () => {
+            new TaskModal(this.app, null, categoryType, async (data) => {
+                await this.taskManager.createTask(data);
+            }).open();
         });
     }
 }

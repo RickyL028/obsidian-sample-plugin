@@ -5,13 +5,13 @@ export class TaskModal extends Modal {
     taskData: Partial<TaskData>;
     onSubmit: (result: Partial<TaskData>) => void;
 
-    constructor(app: App, defaultData: Partial<TaskData> | null, onSubmit: (result: Partial<TaskData>) => void) {
+    constructor(app: App, defaultData: Partial<TaskData> | null, defaultCategory: string = 'general', onSubmit: (result: Partial<TaskData>) => void) {
         super(app);
         this.onSubmit = onSubmit;
         this.taskData = defaultData || {
             name: '',
-            type: 'daily',
-            dueDate: new Date().toISOString().split('T')[0],
+            type: defaultCategory as any,
+            dueDate: '', // No due date by default
             repetition: 'none',
             rewardXp: 10,
             rewardDiamond: 0,
@@ -25,11 +25,17 @@ export class TaskModal extends Modal {
         contentEl.empty();
         contentEl.createEl('h2', { text: this.taskData.name ? 'Edit Quest' : 'New Quest' });
 
-        new Setting(contentEl).setName('Task Name').addText(t => t.setValue(this.taskData.name!).onChange(v => this.taskData.name = v));
+        new Setting(contentEl)
+            .setName('Task Name')
+            .addText(t => t.setValue(this.taskData.name!).onChange(v => this.taskData.name = v));
         
-        new Setting(contentEl).setName('Due Date (YYYY-MM-DD)').addText(t => t.setValue(this.taskData.dueDate!).onChange(v => this.taskData.dueDate = v));
+        new Setting(contentEl)
+            .setName('Due Date')
+            .setDesc('Leave blank for no due date')
+            .addText(t => t.setPlaceholder('YYYY-MM-DD').setValue(this.taskData.dueDate!).onChange(v => this.taskData.dueDate = v));
 
         new Setting(contentEl).setName('Task Type').addDropdown(d => {
+            d.addOption('general', 'General (Inbox)');
             d.addOption('daily', 'Daily');
             d.addOption('weekly', 'Weekly');
             d.addOption('strategic', 'Strategic Goals');

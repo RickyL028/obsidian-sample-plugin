@@ -17,15 +17,15 @@ export const DEFAULT_SETTINGS: Lv999Settings = {
 };
 
 export interface TaskData {
-    id: string; // usually filename
+    id: string; 
     name: string;
-    type: 'daily' | 'weekly' | 'strategic' | 'negative';
-    dueDate: string;
+    type: 'daily' | 'weekly' | 'strategic' | 'negative' | 'general';
+    dueDate: string; 
     repetition: string; 
     rewardXp: number;
     rewardDiamond: number;
     rewardGold: number;
     rewardSilver: number;
     completed: boolean;
-    file: any; // Obsidian TFile
+    file: any; 
 }

@@ -323,3 +323,41 @@
     opacity: 0;
     pointer-events: none;
 }
+/* Quick Add Row inside Panels */
+.lv999-quick-add {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-top: 5px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px dashed transparent;
+}
+
+.lv999-quick-add span {
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.lv999-quick-add:hover {
+    background: var(--background-modifier-hover);
+    color: var(--interactive-accent);
+    border-color: var(--interactive-accent);
+}
+
+.todoist-card.lv999-quick-add {
+    border: none;
+    border-bottom: 1px dashed transparent;
+    border-radius: 0;
+    padding-left: 5px;
+}
+
+.todoist-card.lv999-quick-add:hover {
+    border-bottom-color: var(--interactive-accent);
+    background: transparent;
+}
+
+/* General Inbox Panel Styling */
+.panel-general { border-top: 4px solid var(--text-muted); }
